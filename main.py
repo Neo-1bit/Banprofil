@@ -55,7 +55,12 @@ def demo_height_profile() -> None:
 def demo_kml_export() -> None:
     builder = HeightProfileBuilder.from_config_file()
     profile = builder.build_height_profile(start_km="75+935", end_km="125+935")
-    output = export_height_profile_kml(profile, Path("examples") / "proof_of_concept_50km.kml")
+    segments = builder.build_height_segments(start_km="75+935", end_km="125+935")
+    output = export_height_profile_kml(
+        profile,
+        Path("examples") / "proof_of_concept_50km.kml",
+        segments=segments,
+    )
     print(f"\nKML exporterad till: {output}")
 
 

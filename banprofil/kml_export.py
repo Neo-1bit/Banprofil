@@ -6,14 +6,15 @@ from pathlib import Path
 from typing import Iterable
 from xml.sax.saxutils import escape
 
-from .height_profile import HeightSample
+from .height_profile import HeightSample, HeightSegment
 
 
 @dataclass(frozen=True, slots=True)
 class KmlPlacemark:
     name: str
     description: str
-    coordinates: str
+    geometry_xml: str
+    style_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,32 +81,63 @@ def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) 
     )
 
 
+def _line_string_geometry(coordinates: str) -> str:
+    return f"""
+      <LineString>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>{coordinates}</coordinates>
+      </LineString>"""
+
+
+def _point_geometry(longitude: float, latitude: float, altitude: float) -> str:
+    return f"""
+      <Point>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>{longitude},{latitude},{altitude}</coordinates>
+      </Point>"""
+
+
+def _styles_xml() -> str:
+    return """
+    <Style id="profileLine">
+      <LineStyle><color>ff00a5ff</color><width>3</width></LineStyle>
+    </Style>
+    <Style id="segmentLineFlat">
+      <LineStyle><color>ff00ff00</color><width>3</width></LineStyle>
+    </Style>
+    <Style id="segmentLineUp">
+      <LineStyle><color>ff0000ff</color><width>3</width></LineStyle>
+    </Style>
+    <Style id="segmentLineDown">
+      <LineStyle><color>ff00ffff</color><width>3</width></LineStyle>
+    </Style>
+    <Style id="samplePoint">
+      <IconStyle>
+        <color>ff00a5ff</color>
+        <scale>0.7</scale>
+      </IconStyle>
+    </Style>
+    """
+
+
 def build_kml_document(name: str, placemarks: Iterable[KmlPlacemark]) -> str:
     body = []
     for placemark in placemarks:
+        style_ref = f"<styleUrl>#{placemark.style_id}</styleUrl>" if placemark.style_id else ""
         body.append(
             f"""
     <Placemark>
       <name>{escape(placemark.name)}</name>
       <description>{escape(placemark.description)}</description>
-      <Style>
-        <LineStyle>
-          <color>ff00a5ff</color>
-          <width>3</width>
-        </LineStyle>
-      </Style>
-      <LineString>
-        <tessellate>1</tessellate>
-        <altitudeMode>absolute</altitudeMode>
-        <coordinates>{placemark.coordinates}</coordinates>
-      </LineString>
+      {style_ref}{placemark.geometry_xml}
     </Placemark>"""
         )
 
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>{escape(name)}</name>{''.join(body)}
+    <name>{escape(name)}</name>{_styles_xml()}{''.join(body)}
   </Document>
 </kml>
 """
@@ -119,13 +151,66 @@ def height_samples_to_linestring(samples: list[HeightSample]) -> str:
     return " ".join(coords)
 
 
-def export_height_profile_kml(samples: list[HeightSample], output_path: str | Path, name: str = "Banprofil Proof of Concept") -> Path:
-    placemark = KmlPlacemark(
-        name=name,
-        description="Höjdprofil exporterad från Banprofil i WGS84 för Google Earth",
-        coordinates=height_samples_to_linestring(samples),
+def _segment_style(segment: HeightSegment) -> str:
+    if segment.average_grade_promille is None:
+        return "segmentLineFlat"
+    if segment.average_grade_promille > 1.0:
+        return "segmentLineUp"
+    if segment.average_grade_promille < -1.0:
+        return "segmentLineDown"
+    return "segmentLineFlat"
+
+
+def export_height_profile_kml(
+    samples: list[HeightSample],
+    output_path: str | Path,
+    name: str = "Banprofil Proof of Concept",
+    segments: list[HeightSegment] | None = None,
+) -> Path:
+    placemarks: list[KmlPlacemark] = []
+
+    placemarks.append(
+        KmlPlacemark(
+            name=name,
+            description="Höjdprofil exporterad från Banprofil i WGS84 för Google Earth",
+            geometry_xml=_line_string_geometry(height_samples_to_linestring(samples)),
+            style_id="profileLine",
+        )
     )
-    content = build_kml_document(name=name, placemarks=[placemark])
+
+    for sample in samples:
+        point = sweref99tm_to_wgs84(sample.e, sample.n, sample.z if sample.z is not None else 0.0)
+        description = f"km: {sample.km}\nkälla: {sample.source}\nhöjd: {sample.z}"
+        placemarks.append(
+            KmlPlacemark(
+                name=f"Punkt {sample.km}",
+                description=description,
+                geometry_xml=_point_geometry(point.longitude, point.latitude, point.altitude),
+                style_id="samplePoint",
+            )
+        )
+
+    for segment in segments or []:
+        start = sweref99tm_to_wgs84(segment.start_e, segment.start_n, segment.start_z or 0.0)
+        end = sweref99tm_to_wgs84(segment.end_e, segment.end_n, segment.end_z or 0.0)
+        coordinates = f"{start.longitude},{start.latitude},{start.altitude} {end.longitude},{end.latitude},{end.altitude}"
+        description = (
+            f"från: {segment.start_km}\n"
+            f"till: {segment.end_km}\n"
+            f"längd: {segment.distance_m:.1f} m\n"
+            f"delta z: {segment.delta_z}\n"
+            f"medellutning: {segment.average_grade_promille} ‰"
+        )
+        placemarks.append(
+            KmlPlacemark(
+                name=f"Segment {segment.start_km} - {segment.end_km}",
+                description=description,
+                geometry_xml=_line_string_geometry(coordinates),
+                style_id=_segment_style(segment),
+            )
+        )
+
+    content = build_kml_document(name=name, placemarks=placemarks)
     path = Path(output_path)
     path.write_text(content, encoding="utf-8")
     return path
