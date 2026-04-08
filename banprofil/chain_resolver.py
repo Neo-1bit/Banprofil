@@ -5,6 +5,7 @@ from typing import Any
 
 from .chain_analysis import ChainAnalyzer
 from .height_profile import HeightProfileBuilder, HeightSample, HeightSegment
+from .master_network_analyzer import MasterNetworkAnalyzer
 from .profile_chain import parse_km_string
 
 
@@ -27,21 +28,24 @@ class ResolvedChain:
         Kommentar om hur kedjan valdes.
     sample_count : int
         Antal datapunkter som ingick i valet.
+    filters : dict[str, Any]
+        Filter eller överordnade nycklar som användes i valet.
     """
 
     chain_key: str
     strategy: str
     notes: str
     sample_count: int
+    filters: dict[str, Any]
 
 
 class ChainResolver:
     """
     Försöker välja en sammanhängande kedja för ett km-intervall.
 
-    Första versionen använder heuristik och bygger på kedjeanalysens resultat.
-    Målet är att undvika att olika geografiska delsträckor blandas ihop när
-    samma km-tal återkommer på flera platser.
+    Första versionen använde en ren intervallheuristik. V2 förbereder för
+    masterbaserad kedjeresolution genom att explicit bära med sig tänkta
+    parent filters som bandel, längdmätningsdel och spårdimension.
 
     Parameters
     ----------
@@ -49,9 +53,16 @@ class ChainResolver:
         Analysobjekt för Trafikverkets GeoPackage.
     profile_builder : HeightProfileBuilder
         Byggare för höjdprofiler.
+    master_analyzer : MasterNetworkAnalyzer | None, optional
+        Analyzer för masterpaketets nätverks- och parentlager.
     """
 
-    def __init__(self, analyzer: ChainAnalyzer, profile_builder: HeightProfileBuilder) -> None:
+    def __init__(
+        self,
+        analyzer: ChainAnalyzer,
+        profile_builder: HeightProfileBuilder,
+        master_analyzer: MasterNetworkAnalyzer | None = None,
+    ) -> None:
         """
         Initierar kedjeresolvern.
 
@@ -61,9 +72,12 @@ class ChainResolver:
             Analysobjekt för Trafikverkets GeoPackage.
         profile_builder : HeightProfileBuilder
             Byggare för höjdprofiler.
+        master_analyzer : MasterNetworkAnalyzer | None, optional
+            Analyzer för masterpaketets nätverks- och parentlager.
         """
         self.analyzer = analyzer
         self.profile_builder = profile_builder
+        self.master_analyzer = master_analyzer
 
     @classmethod
     def from_config_file(cls, config_path: str = "config.json") -> "ChainResolver":
@@ -82,7 +96,33 @@ class ChainResolver:
         """
         analyzer = ChainAnalyzer.from_config_file(config_path)
         profile_builder = HeightProfileBuilder.from_config_file(config_path)
-        return cls(analyzer=analyzer, profile_builder=profile_builder)
+        master_analyzer = MasterNetworkAnalyzer.from_config_file(config_path)
+        return cls(analyzer=analyzer, profile_builder=profile_builder, master_analyzer=master_analyzer)
+
+    def _infer_parent_filters(self, start_km: str, end_km: str) -> dict[str, Any]:
+        """
+        Härleder preliminära parent filters för kedjan.
+
+        Parameters
+        ----------
+        start_km : str
+            Start på intervallet.
+        end_km : str
+            Slut på intervallet.
+
+        Returns
+        -------
+        dict[str, Any]
+            Preliminära filter för bandel, längdmätningsdel och spår.
+        """
+        strategy = self.master_analyzer.recommend_chain_key_strategy() if self.master_analyzer else {}
+        return {
+            "bandel": "to-be-resolved",
+            "langdmatningsdel": "to-be-resolved",
+            "spar": "to-be-resolved",
+            "network_backbone": strategy.get("network_backbone", []),
+            "km_interval": {"start": start_km, "end": end_km},
+        }
 
     def resolve_chain(self, start_km: str, end_km: str) -> ResolvedChain:
         """
@@ -99,22 +139,31 @@ class ChainResolver:
         -------
         ResolvedChain
             Beskrivning av vald kedja.
+
+        Raises
+        ------
+        ChainResolverError
+            Om inga profilerade punkter hittas för intervallet.
         """
         profile = self.profile_builder.build_height_profile(start_km=start_km, end_km=end_km)
         if not profile:
             raise ChainResolverError("No height profile samples found for interval")
 
-        # Första heuristik: välj kedja utifrån vilket km-intervall vi faktiskt arbetar med.
-        # Tills vi hittat explicita relationer används ett stabilt kedjenamn per intervall.
         start_m = parse_km_string(start_km).total_meters
         end_m = parse_km_string(end_km).total_meters
-        chain_key = f"interval:{int(start_m)}-{int(end_m)}"
+        filters = self._infer_parent_filters(start_km, end_km)
+        chain_key = f"master-interval:{int(start_m)}-{int(end_m)}"
 
         return ResolvedChain(
             chain_key=chain_key,
-            strategy="interval-heuristic",
-            notes="Första versionen håller ihop en fysisk profil inom valt intervall och förbereder nästa steg där längdmätningsdel/spår binds explicit.",
+            strategy="master-parent-heuristic-v2",
+            notes=(
+                "V2 utgår från masterpaketets modell och bär med sig explicita parent filters "
+                "för bandel, längdmätningsdel och spårdimension. Nästa steg är att lösa dessa "
+                "filters direkt via mastertabellerna och därefter filtrera profilobjekten hårt."
+            ),
             sample_count=len(profile),
+            filters=filters,
         )
 
     def build_resolved_profile(self, start_km: str, end_km: str) -> tuple[ResolvedChain, list[HeightSample], list[HeightSegment]]:

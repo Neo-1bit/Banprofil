@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
-    <name>Resolved interval:75935-125935</name>
+    <name>Resolved master-interval:75935-125935</name>
     <Style id="profileLine">
       <LineStyle><color>ff00a5ff</color><width>3</width></LineStyle>
     </Style>
@@ -22,7 +22,7 @@
     </Style>
     
     <Placemark>
-      <name>Resolved interval:75935-125935</name>
+      <name>Resolved master-interval:75935-125935</name>
       <description>Höjdprofil exporterad från Banprofil i WGS84 för Google Earth</description>
       <styleUrl>#profileLine</styleUrl>
       <LineString>
