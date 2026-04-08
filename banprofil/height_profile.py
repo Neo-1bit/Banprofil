@@ -31,6 +31,22 @@ class HeightSample:
         return parse_km_string(self.km).total_meters
 
 
+@dataclass(slots=True)
+class HeightSegment:
+    start_km: str
+    end_km: str
+    start_e: float
+    start_n: float
+    start_z: float | None
+    end_e: float
+    end_n: float
+    end_z: float | None
+    distance_m: float
+    delta_z: float | None
+    average_grade_promille: float | None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
 class HeightProfileBuilder:
     def __init__(
         self,
@@ -170,3 +186,33 @@ class HeightProfileBuilder:
         samples = list(samples_by_key.values())
         samples.sort(key=lambda sample: (sample.km_meters, sample.e, sample.n))
         return samples
+
+    def build_height_segments(self, start_km: str, end_km: str) -> list[HeightSegment]:
+        samples = self.build_height_profile(start_km=start_km, end_km=end_km)
+        segments: list[HeightSegment] = []
+
+        for start, end in zip(samples, samples[1:]):
+            distance_m = end.km_meters - start.km_meters
+            if distance_m <= 0:
+                continue
+            delta_z = None if start.z is None or end.z is None else end.z - start.z
+            average_grade = None if delta_z is None else (delta_z / distance_m) * 1000.0
+            metadata = self._merge_metadata(start.metadata, end.metadata)
+            segments.append(
+                HeightSegment(
+                    start_km=start.km,
+                    end_km=end.km,
+                    start_e=start.e,
+                    start_n=start.n,
+                    start_z=start.z,
+                    end_e=end.e,
+                    end_n=end.n,
+                    end_z=end.z,
+                    distance_m=distance_m,
+                    delta_z=delta_z,
+                    average_grade_promille=average_grade,
+                    metadata=metadata,
+                )
+            )
+
+        return segments

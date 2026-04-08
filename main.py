@@ -3,8 +3,10 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import asdict
+from pathlib import Path
 
 from banprofil.height_profile import HeightProfileBuilder
+from banprofil.kml_export import export_height_profile_kml
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
 from banprofil.profile_chain import ProfileChainError, ProfileChainIndex
 from banprofil.trafikverket_gpkg import TrafikverketGeoPackage, TrafikverketGeoPackageError
@@ -45,12 +47,24 @@ def demo_height_profile() -> None:
     print("\nHöjdprofil:")
     print(json.dumps(serializable, indent=2, ensure_ascii=False, default=str))
 
+    segments = builder.build_height_segments(start_km="1180+200", end_km="1180+320")
+    print("\nHöjdsegment:")
+    print(json.dumps([asdict(segment) for segment in segments[:5]], indent=2, ensure_ascii=False, default=str))
+
+
+def demo_kml_export() -> None:
+    builder = HeightProfileBuilder.from_config_file()
+    profile = builder.build_height_profile(start_km="75+935", end_km="125+935")
+    output = export_height_profile_kml(profile, Path("examples") / "proof_of_concept_50km.kml")
+    print(f"\nKML exporterad till: {output}")
+
 
 def main() -> None:
     try:
         demo_lantmateriet()
         demo_trafikverket()
         demo_height_profile()
+        demo_kml_export()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
