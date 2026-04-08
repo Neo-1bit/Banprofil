@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import heapq
 import math
 import struct
 from collections import defaultdict
@@ -23,9 +24,15 @@ class NetJvgNode:
     ----------
     oid : str
         Nodens OID.
+    easting : float | None
+        Nodens easting i SWEREF 99 TM när geometri lästs in.
+    northing : float | None
+        Nodens northing i SWEREF 99 TM när geometri lästs in.
     """
 
     oid: str
+    easting: float | None = None
+    northing: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +148,29 @@ class TraversalResult:
     notes: str
 
 
+@dataclass(frozen=True, slots=True)
+class PointToNodeMatch:
+    """
+    Matchning mellan referenspunkt och närmaste Net_JVG-nod.
+
+    Parameters
+    ----------
+    node_oid : str
+        Matchad nod.
+    easting : float
+        Nodens easting i SWEREF 99 TM.
+    northing : float
+        Nodens northing i SWEREF 99 TM.
+    distance_m : float
+        Avstånd från referenspunkten till noden i meter.
+    """
+
+    node_oid: str
+    easting: float
+    northing: float
+    distance_m: float
+
+
 class NetJvgResolver:
     """
     Första nätverksförst-resolvern för Trafikverkets `Net_JVG_*`-lager.
@@ -185,7 +215,28 @@ class NetJvgResolver:
             raise NetJvgResolverError("Config is missing trafikverket_gpkg_path")
         return cls(TrafikverketGeoPackage(gpkg_path))
 
-    def load_nodes(self, limit: int | None = None) -> list[NetJvgNode]:
+    def _decode_node_xy(self, geom: bytes | None) -> tuple[float, float] | None:
+        """
+        Dekodar nodpunkt ur GeoPackage-geometri.
+
+        Parameters
+        ----------
+        geom : bytes | None
+            Binär GeoPackage-geometri.
+
+        Returns
+        -------
+        tuple[float, float] | None
+            Easting och northing i SWEREF 99 TM, eller `None` om tolkning misslyckas.
+        """
+        if not isinstance(geom, bytes) or len(geom) < 29:
+            return None
+        return (
+            struct.unpack('<d', geom[13:21])[0],
+            struct.unpack('<d', geom[21:29])[0],
+        )
+
+    def load_nodes(self, limit: int | None = None, include_geom: bool = False) -> list[NetJvgNode]:
         """
         Läser noder från `Net_JVG_Node`.
 
@@ -193,6 +244,8 @@ class NetJvgResolver:
         ----------
         limit : int | None, optional
             Max antal noder att läsa. `None` läser alla.
+        include_geom : bool, optional
+            Om `True` dekodas nodernas SWEREF-position.
 
         Returns
         -------
@@ -200,8 +253,20 @@ class NetJvgResolver:
             Noder i nätverket.
         """
         row_limit = limit if limit is not None else self.gpkg.count_rows("Net_JVG_Node")
-        rows = self.gpkg.fetch_rows("Net_JVG_Node", limit=row_limit, columns=["OID"])
-        return [NetJvgNode(oid=str(row["OID"])) for row in rows]
+        columns = ["OID"]
+        if include_geom:
+            columns.append("geom")
+        rows = self.gpkg.fetch_rows("Net_JVG_Node", limit=row_limit, columns=columns)
+        nodes: list[NetJvgNode] = []
+        for row in rows:
+            easting = None
+            northing = None
+            if include_geom:
+                point = self._decode_node_xy(row.get("geom"))
+                if point is not None:
+                    easting, northing = point
+            nodes.append(NetJvgNode(oid=str(row["OID"]), easting=easting, northing=northing))
+        return nodes
 
     def load_links(self, limit: int | None = None, include_geom: bool = False) -> list[NetJvgLink]:
         """
@@ -427,6 +492,128 @@ class NetJvgResolver:
             traversed_link_ids=traversed_link_ids,
             traversed_node_oids=traversed_node_oids,
             notes="Traversal v2 använder enkel riktningskontinuitet för att följa huvudkorridoren och undvika grenar.",
+        )
+
+    def match_reference_point_to_node(self, easting: float, northing: float) -> PointToNodeMatch:
+        """
+        Matchar en SWEREF-referenspunkt till närmaste Net_JVG-nod.
+
+        Parameters
+        ----------
+        easting : float
+            Easting i SWEREF 99 TM.
+        northing : float
+            Northing i SWEREF 99 TM.
+
+        Returns
+        -------
+        PointToNodeMatch
+            Närmaste nod och avstånd till referenspunkten.
+        """
+        nodes = self.load_nodes(limit=None, include_geom=True)
+        best_match: PointToNodeMatch | None = None
+        for node in nodes:
+            if node.easting is None or node.northing is None:
+                continue
+            distance_m = math.hypot(node.easting - easting, node.northing - northing)
+            if best_match is None or distance_m < best_match.distance_m:
+                best_match = PointToNodeMatch(
+                    node_oid=node.oid,
+                    easting=node.easting,
+                    northing=node.northing,
+                    distance_m=distance_m,
+                )
+        if best_match is None:
+            raise NetJvgResolverError("Could not decode any Net_JVG node geometries")
+        return best_match
+
+    def route_between_nodes(
+        self,
+        start_node_oid: str,
+        end_node_oid: str,
+        limit_links: int | None = None,
+    ) -> TraversalResult:
+        """
+        Beräknar kortaste väg i Net_JVG mellan två noder.
+
+        Parameters
+        ----------
+        start_node_oid : str
+            Startnodens OID.
+        end_node_oid : str
+            Slutnodens OID.
+        limit_links : int | None, optional
+            Max antal länkar att läsa. `None` läser alla.
+
+        Returns
+        -------
+        TraversalResult
+            Traversalresultat för rutten mellan noderna.
+
+        Raises
+        ------
+        NetJvgResolverError
+            Om någon nod saknas eller om ingen rutt hittas.
+        """
+        links = self.load_links(limit=limit_links, include_geom=True)
+        adjacency: dict[str, list[tuple[str, NetJvgLink]]] = defaultdict(list)
+        for link in links:
+            adjacency[link.start_node_oid].append((link.end_node_oid, link))
+            adjacency[link.end_node_oid].append((link.start_node_oid, link))
+
+        if start_node_oid not in adjacency:
+            raise NetJvgResolverError(f"Start node not found in graph: {start_node_oid}")
+        if end_node_oid not in adjacency:
+            raise NetJvgResolverError(f"End node not found in graph: {end_node_oid}")
+
+        distances: dict[str, float] = {start_node_oid: 0.0}
+        previous_nodes: dict[str, str] = {}
+        previous_links: dict[str, int] = {}
+        queue: list[tuple[float, str]] = [(0.0, start_node_oid)]
+        visited: set[str] = set()
+
+        while queue:
+            distance_so_far, current_node_oid = heapq.heappop(queue)
+            if current_node_oid in visited:
+                continue
+            visited.add(current_node_oid)
+            if current_node_oid == end_node_oid:
+                break
+            for neighbor_oid, link in adjacency[current_node_oid]:
+                new_distance = distance_so_far + link.length
+                if new_distance >= distances.get(neighbor_oid, float('inf')):
+                    continue
+                distances[neighbor_oid] = new_distance
+                previous_nodes[neighbor_oid] = current_node_oid
+                previous_links[neighbor_oid] = link.id
+                heapq.heappush(queue, (new_distance, neighbor_oid))
+
+        if end_node_oid not in distances:
+            raise NetJvgResolverError(
+                f"No route found between Net_JVG nodes {start_node_oid} and {end_node_oid}"
+            )
+
+        traversed_node_oids: list[str] = [end_node_oid]
+        traversed_link_ids: list[int] = []
+        current_node_oid = end_node_oid
+        while current_node_oid != start_node_oid:
+            traversed_link_ids.append(previous_links[current_node_oid])
+            current_node_oid = previous_nodes[current_node_oid]
+            traversed_node_oids.append(current_node_oid)
+        traversed_link_ids.reverse()
+        traversed_node_oids.reverse()
+
+        return TraversalResult(
+            start_node_oid=start_node_oid,
+            target_length_m=distances[end_node_oid],
+            visited_node_count=len(traversed_node_oids),
+            visited_link_count=len(traversed_link_ids),
+            accumulated_length_m=distances[end_node_oid],
+            traversed_link_ids=traversed_link_ids,
+            traversed_node_oids=traversed_node_oids,
+            notes=(
+                "Point-to-point route i Net_JVG beräknad med kortaste väg mellan matchade referensnoder."
+            ),
         )
 
     def recommend_next_steps(self) -> dict[str, Any]:

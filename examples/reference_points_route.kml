@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Net_JVG Route Between Reference Points</name>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 1</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.29720392828376,63.4270471857388,0.0 18.291826504447677,63.42637874899698,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 2</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.158669841764755,63.42582269968808,0.0 18.158399667030473,63.425809224707386,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 3</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.153840876889124,63.425620726193856,0.0 18.15362700919075,63.42562827982015,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 4</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.152701642940908,63.42567518966217,0.0 18.15254954325318,63.425686374256045,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 5</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.13603116514672,63.42745788110812,0.0 18.13473764925548,63.42756387858177,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 6</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.126249271232055,63.42811270699245,0.0 18.125966286695302,63.42810467531426,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 7</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.9789252272763,63.428187488467174,0.0 17.978820968167543,63.42805330585174,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 8</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.978270686322606,63.42562822809015,0.0 17.978316672363842,63.425355019460085,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 9</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.97587974182353,63.41887436166537,0.0 17.97501925999849,63.417730442325954,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 10</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.974065745034192,63.415209098263745,0.0 17.97406045517503,63.41514921637096,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 11</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.874238910071565,63.38300596109831,0.0 17.872431376702483,63.38331389080221,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points sekvens 12</name>
+      <description>Länkar: 12. Vertex i sekvens: 2.</description>
+      <Style>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.86896186993604,63.38390664604802,0.0 17.868590784075113,63.38397421019571,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 24406</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.29720392828376,63.4270471857388,0.0 18.291826504447677,63.42637874899698,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25534</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.158669841764755,63.42582269968808,0.0 18.158399667030473,63.425809224707386,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25532</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.153840876889124,63.425620726193856,0.0 18.15362700919075,63.42562827982015,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25518</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.152701642940908,63.42567518966217,0.0 18.15254954325318,63.425686374256045,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 24398</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.13603116514672,63.42745788110812,0.0 18.13473764925548,63.42756387858177,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25533</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>18.126249271232055,63.42811270699245,0.0 18.125966286695302,63.42810467531426,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25516</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.9789252272763,63.428187488467174,0.0 17.978820968167543,63.42805330585174,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25503</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.978270686322606,63.42562822809015,0.0 17.978316672363842,63.425355019460085,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25502</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.97587974182353,63.41887436166537,0.0 17.97501925999849,63.417730442325954,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25504</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.974065745034192,63.415209098263745,0.0 17.97406045517503,63.41514921637096,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 25501</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.874238910071565,63.38300596109831,0.0 17.872431376702483,63.38331389080221,0.0</coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Net_JVG Route Between Reference Points link 24359</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>17.86896186993604,63.38390664604802,0.0 17.868590784075113,63.38397421019571,0.0</coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
