@@ -44,7 +44,9 @@ class LantmaterietClient:
     @classmethod
     def from_config_file(cls, path: str | Path) -> "LantmaterietClient":
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-        config = LantmaterietConfig(**data)
+        allowed_keys = {field for field in LantmaterietConfig.__dataclass_fields__}
+        filtered = {key: value for key, value in data.items() if key in allowed_keys}
+        config = LantmaterietConfig(**filtered)
         return cls(config)
 
     def _build_basic_auth_header(self) -> str:

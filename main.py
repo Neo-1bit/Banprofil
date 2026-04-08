@@ -26,15 +26,15 @@ def demo_lantmateriet() -> None:
 
 
 def demo_trafikverket() -> None:
-    gpkg_path = Path("../filelibrary/trafikverket/Trafikverket_Sweref_Geopackage_677446/Trafikverket_Sweref_677446.gpkg")
-    if not gpkg_path.exists():
-        logger.warning("Trafikverket GeoPackage saknas, hoppar över GeoPackage-test.")
+    config_path = Path("config.json")
+    if not config_path.exists():
+        logger.warning("config.json saknas, hoppar över Trafikverket-test.")
         return
 
-    gpkg = TrafikverketGeoPackage(gpkg_path)
+    gpkg = TrafikverketGeoPackage.from_config_file(config_path)
     summary = gpkg.summarize_default_layers()
     print("\nTrafikverket standardlager:")
-    print(json.dumps(summary[:3], indent=2, ensure_ascii=False))
+    print(json.dumps(summary[:4], indent=2, ensure_ascii=False))
 
     sample_rows = gpkg.fetch_named_layer("raklinje", limit=2)
     print("\nExempel från raklinje:")

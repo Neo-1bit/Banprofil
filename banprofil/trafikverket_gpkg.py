@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import glob
 import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +27,7 @@ class TrafikverketGeoPackage:
         "overgangskurva": "BIS_DK_O_4011_Overgangskurva",
         "vertikalkurva": "BIS_DK_O_4014_Vertikalkurva",
         "lutning": "BIS_DK_O_4015_Lutning",
+        "ralsforhojning": "BIS_DK_O_4013_Ralsforhojning",
         "driftplats": "BIS_DK_O_597_Driftplats_med_driftplat",
     }
 
@@ -33,6 +35,26 @@ class TrafikverketGeoPackage:
         self.gpkg_path = Path(gpkg_path)
         if not self.gpkg_path.exists():
             raise TrafikverketGeoPackageError(f"GeoPackage not found: {self.gpkg_path}")
+
+    @classmethod
+    def from_config_file(cls, config_path: str | Path) -> "TrafikverketGeoPackage":
+        import json
+
+        config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+        gpkg_path = config.get("trafikverket_gpkg_path")
+        if gpkg_path:
+            return cls(gpkg_path)
+
+        gpkg_glob = config.get("trafikverket_gpkg_glob")
+        if gpkg_glob:
+            matches = sorted(glob.glob(gpkg_glob, recursive=True))
+            if matches:
+                latest = max(matches, key=lambda p: Path(p).stat().st_mtime)
+                return cls(latest)
+
+        raise TrafikverketGeoPackageError(
+            "No Trafikverket GeoPackage path found in config. Set trafikverket_gpkg_path or trafikverket_gpkg_glob."
+        )
 
     def _connect(self) -> sqlite3.Connection:
         return sqlite3.connect(self.gpkg_path)
