@@ -8,6 +8,7 @@ from pathlib import Path
 from banprofil.chain_analysis import ChainAnalyzer
 from banprofil.chain_resolver import ChainResolver
 from banprofil.height_profile import HeightProfileBuilder
+from banprofil.master_network_analyzer import MasterNetworkAnalyzer
 from banprofil.kml_export import export_height_profile_kml
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
 from banprofil.profile_chain import ProfileChainError, ProfileChainIndex
@@ -136,6 +137,24 @@ def demo_chain_resolver() -> None:
     print(f"Kedjebunden KML exporterad till: {output}")
 
 
+def demo_master_network_analysis() -> None:
+    """
+    Kör en första analys av masterpaketets nätverksstruktur.
+
+    Returns
+    -------
+    None
+        Funktionen skriver analysresultat till standard output.
+    """
+    analyzer = MasterNetworkAnalyzer.from_config_file()
+    print("\nMaster network tables:")
+    print(json.dumps([asdict(item) for item in analyzer.summarize_network_tables()], indent=2, ensure_ascii=False, default=str))
+    print("\nMaster chain parents:")
+    print(json.dumps([asdict(item) for item in analyzer.summarize_chain_parents()], indent=2, ensure_ascii=False, default=str))
+    print("\nRekommenderad chain key-strategi:")
+    print(json.dumps(analyzer.recommend_chain_key_strategy(), indent=2, ensure_ascii=False))
+
+
 def main() -> None:
     """
     Kör alla demoexempel för projektet.
@@ -157,6 +176,7 @@ def main() -> None:
         demo_kml_export()
         demo_chain_analysis()
         demo_chain_resolver()
+        demo_master_network_analysis()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
