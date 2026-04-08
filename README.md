@@ -46,14 +46,21 @@ Och först därefter projiceras featurelager som:
 
 ## Demo
 
+Kör allt:
+
 ```bash
 python main.py
 ```
 
-Det kör:
-- master network analysis
-- `Net_JVG` traversal v1
-- feature projection v2
+Kör separata delar:
+
+```bash
+python run_master_analysis.py
+python run_traversal_demo.py
+python run_feature_projection.py
+```
+
+Det här gör det lättare att verifiera varje steg separat.
 
 ## Nästa steg
 
