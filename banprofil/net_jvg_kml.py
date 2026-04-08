@@ -85,7 +85,10 @@ def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) 
 
 def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     """
-    Dekodar vertices ur GeoPackage-linjegeometri.
+    Dekodar vertices ur GeoPackage-linjegeometri för `Net_JVG_Link`.
+
+    Trafikverkets masterdata använder här en generell GEOMETRY med Z och M,
+    där WKB-delen innehåller 4D-koordinater per vertex.
 
     Parameters
     ----------
@@ -97,11 +100,21 @@ def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     list[tuple[float, float]]
         Vertexlista i SWEREF 99 TM.
     """
-    if not isinstance(geom, bytes) or len(geom) < 40:
+    if not isinstance(geom, bytes) or len(geom) < 65:
         return []
-    # Temporär men bättre debug-geometri: använd länkens bbox som diagonal linje.
-    minx, maxx, miny, maxy = struct.unpack('<dddd', geom[8:40])
-    return [(minx, miny), (maxx, maxy)]
+    point_count = struct.unpack('<I', geom[57:61])[0] - 3000
+    if point_count <= 0:
+        return []
+    offset = 65
+    points: list[tuple[float, float]] = []
+    for _ in range(point_count):
+        if offset + 32 > len(geom):
+            break
+        x = struct.unpack('<d', geom[offset:offset + 8])[0]
+        y = struct.unpack('<d', geom[offset + 8:offset + 16])[0]
+        points.append((x, y))
+        offset += 32
+    return points
 
 
 def export_traversal_kml(
