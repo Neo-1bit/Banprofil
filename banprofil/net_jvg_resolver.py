@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
@@ -99,6 +98,38 @@ class NetJvgNetworkSummary:
     link_count: int
     linksequence_count: int
     connected_component_sizes: list[int]
+    notes: str
+
+
+@dataclass(frozen=True, slots=True)
+class TraversalResult:
+    """
+    Resultat från en enkel nätverkstraversering.
+
+    Parameters
+    ----------
+    start_node_oid : str
+        Startnod för traverseringen.
+    target_length_m : float
+        Önskad traverseringslängd.
+    visited_node_count : int
+        Antal besökta noder.
+    visited_link_count : int
+        Antal traverserade länkar.
+    accumulated_length_m : float
+        Ackumulerad längd i meter.
+    traversed_link_ids : list[int]
+        Länk-id:n i traverserad ordning.
+    notes : str
+        Kommentar om traversalens karaktär.
+    """
+
+    start_node_oid: str
+    target_length_m: float
+    visited_node_count: int
+    visited_link_count: int
+    accumulated_length_m: float
+    traversed_link_ids: list[int]
     notes: str
 
 
@@ -278,6 +309,73 @@ class NetJvgResolver:
             linksequence_count=len(sequences),
             connected_component_sizes=component_sizes[:10],
             notes="Första sammanfattning av Net_JVG-nätet. Nästa steg är att följa länksekvenser och koppla features ovanpå nätverket.",
+        )
+
+    def traverse_from_node(self, start_node_oid: str, target_length_m: float = 50000.0, limit_links: int | None = 20000) -> TraversalResult:
+        """
+        Traverserar nätverket framåt från en startnod tills önskad längd uppnåtts.
+
+        Traverseringen använder en enkel grafgång över länkar och fungerar som
+        första traversalprototyp, inte som slutlig ruttmotor.
+
+        Parameters
+        ----------
+        start_node_oid : str
+            Startnodens OID.
+        target_length_m : float, optional
+            Mållängd i meter.
+        limit_links : int | None, optional
+            Max antal länkar att läsa för traversal.
+
+        Returns
+        -------
+        TraversalResult
+            Resultat från traverseringen.
+
+        Raises
+        ------
+        NetJvgResolverError
+            Om startnoden inte finns i den lästa grafen.
+        """
+        links = self.load_links(limit=limit_links)
+        adjacency: dict[str, list[tuple[str, NetJvgLink]]] = defaultdict(list)
+        for link in links:
+            adjacency[link.start_node_oid].append((link.end_node_oid, link))
+            adjacency[link.end_node_oid].append((link.start_node_oid, link))
+
+        if start_node_oid not in adjacency:
+            raise NetJvgResolverError(f"Start node not found in traversal graph: {start_node_oid}")
+
+        visited_nodes: set[str] = set()
+        visited_links: set[int] = set()
+        traversed_link_ids: list[int] = []
+        accumulated = 0.0
+        stack = [start_node_oid]
+
+        while stack and accumulated < target_length_m:
+            current = stack.pop()
+            if current in visited_nodes:
+                continue
+            visited_nodes.add(current)
+            for neighbor, link in adjacency[current]:
+                if link.id in visited_links:
+                    continue
+                visited_links.add(link.id)
+                traversed_link_ids.append(link.id)
+                accumulated += link.length
+                if neighbor not in visited_nodes:
+                    stack.append(neighbor)
+                if accumulated >= target_length_m:
+                    break
+
+        return TraversalResult(
+            start_node_oid=start_node_oid,
+            target_length_m=target_length_m,
+            visited_node_count=len(visited_nodes),
+            visited_link_count=len(visited_links),
+            accumulated_length_m=accumulated,
+            traversed_link_ids=traversed_link_ids,
+            notes="Traversal v1 använder enkel grafgång över länkar och är första steg mot sammanhängande nätverkskorridorer.",
         )
 
     def recommend_next_steps(self) -> dict[str, Any]:
