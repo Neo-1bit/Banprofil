@@ -1,11 +1,12 @@
 # Banprofil
 
-Python-modul för kommunikation med Lantmäteriets Markhöjd Direkt API.
+Python-modul för kommunikation med Lantmäteriets Markhöjd Direkt API och läsning av Trafikverkets GeoPackage-data.
 
 ## Innehåll
 
 - `banprofil/lantmateriet_client.py` - klient för tokenhämtning, höjdanrop, batchstöd och felhantering
 - `banprofil/coordinate_transform.py` - omvandling från WGS84 (EPSG:4326) till SWEREF 99 TM (EPSG:3006)
+- `banprofil/trafikverket_gpkg.py` - läsare för Trafikverkets GeoPackage-lager
 - `main.py` - enkel körbar testfil
 - `config.example.json` - mall för credentials och API-inställningar
 - `.gitignore` - skyddar lokala hemligheter
@@ -52,6 +53,29 @@ results = client.get_many_heights([
 ])
 print(results)
 ```
+
+## Exempel, läs Trafikverkets GeoPackage
+
+```python
+from banprofil.trafikverket_gpkg import TrafikverketGeoPackage
+
+gpkg = TrafikverketGeoPackage("../filelibrary/trafikverket/Trafikverket_Sweref_Geopackage_677446/Trafikverket_Sweref_677446.gpkg")
+
+layers = gpkg.list_layers()
+summary = gpkg.summarize_default_layers()
+raklinjer = gpkg.fetch_named_layer("raklinje", limit=5)
+```
+
+Förvalda lager i modulen:
+- `strak`
+- `langdmatningsdel`
+- `spar`
+- `raklinje`
+- `cirkularkurva`
+- `overgangskurva`
+- `vertikalkurva`
+- `lutning`
+- `driftplats`
 
 ## Kör testfilen
 

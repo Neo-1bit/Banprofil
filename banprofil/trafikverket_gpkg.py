@@ -1,0 +1,115 @@
+from __future__ import annotations
+
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+
+class TrafikverketGeoPackageError(Exception):
+    """Base exception for Trafikverket GeoPackage access."""
+
+
+@dataclass(frozen=True, slots=True)
+class LayerInfo:
+    table_name: str
+    data_type: str
+
+
+class TrafikverketGeoPackage:
+    DEFAULT_LAYERS = {
+        "strak": "BIS_DK_O_19_Strak",
+        "langdmatningsdel": "BIS_DK_O_20_Langdmatningsdel",
+        "spar": "BIS_DK_O_70_Spar_Upp_Ned_Enkel",
+        "raklinje": "BIS_DK_O_4012_Raklinje",
+        "cirkularkurva": "BIS_DK_O_4010_Cirkularkurva",
+        "overgangskurva": "BIS_DK_O_4011_Overgangskurva",
+        "vertikalkurva": "BIS_DK_O_4014_Vertikalkurva",
+        "lutning": "BIS_DK_O_4015_Lutning",
+        "driftplats": "BIS_DK_O_597_Driftplats_med_driftplat",
+    }
+
+    def __init__(self, gpkg_path: str | Path) -> None:
+        self.gpkg_path = Path(gpkg_path)
+        if not self.gpkg_path.exists():
+            raise TrafikverketGeoPackageError(f"GeoPackage not found: {self.gpkg_path}")
+
+    def _connect(self) -> sqlite3.Connection:
+        return sqlite3.connect(self.gpkg_path)
+
+    def list_layers(self) -> list[LayerInfo]:
+        with self._connect() as con:
+            cur = con.cursor()
+            cur.execute("SELECT table_name, data_type FROM gpkg_contents ORDER BY table_name")
+            return [LayerInfo(table_name=row[0], data_type=row[1]) for row in cur.fetchall()]
+
+    def get_columns(self, table_name: str) -> list[str]:
+        with self._connect() as con:
+            cur = con.cursor()
+            cur.execute(f'PRAGMA table_info("{table_name}")')
+            rows = cur.fetchall()
+            if not rows:
+                raise TrafikverketGeoPackageError(f"Table not found: {table_name}")
+            return [row[1] for row in rows]
+
+    def fetch_rows(
+        self,
+        table_name: str,
+        limit: int = 100,
+        offset: int = 0,
+        columns: list[str] | None = None,
+        where: str | None = None,
+        order_by: str | None = None,
+    ) -> list[dict[str, Any]]:
+        available_columns = self.get_columns(table_name)
+        selected_columns = columns or [column for column in available_columns if column != "geom"]
+        invalid = [column for column in selected_columns if column not in available_columns]
+        if invalid:
+            raise TrafikverketGeoPackageError(
+                f"Columns not found in {table_name}: {', '.join(invalid)}"
+            )
+
+        query = f'SELECT {", ".join(f"\"{column}\"" for column in selected_columns)} FROM "{table_name}"'
+        if where:
+            query += f" WHERE {where}"
+        if order_by:
+            query += f" ORDER BY {order_by}"
+        query += f" LIMIT {int(limit)} OFFSET {int(offset)}"
+
+        with self._connect() as con:
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            cur.execute(query)
+            return [dict(row) for row in cur.fetchall()]
+
+    def count_rows(self, table_name: str) -> int:
+        with self._connect() as con:
+            cur = con.cursor()
+            cur.execute(f'SELECT COUNT(*) FROM "{table_name}"')
+            return int(cur.fetchone()[0])
+
+    def fetch_named_layer(
+        self,
+        layer_key: str,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        table_name = self.DEFAULT_LAYERS.get(layer_key)
+        if not table_name:
+            raise TrafikverketGeoPackageError(
+                f"Unknown layer key '{layer_key}'. Available: {', '.join(sorted(self.DEFAULT_LAYERS))}"
+            )
+        return self.fetch_rows(table_name=table_name, limit=limit, offset=offset)
+
+    def summarize_default_layers(self) -> list[dict[str, Any]]:
+        summary: list[dict[str, Any]] = []
+        for layer_key, table_name in self.DEFAULT_LAYERS.items():
+            summary.append(
+                {
+                    "layer_key": layer_key,
+                    "table_name": table_name,
+                    "row_count": self.count_rows(table_name),
+                    "columns": self.get_columns(table_name),
+                }
+            )
+        return summary
