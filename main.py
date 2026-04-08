@@ -7,6 +7,7 @@ from pathlib import Path
 
 from banprofil.chain_analysis import ChainAnalyzer
 from banprofil.chain_resolver import ChainResolver
+from banprofil.feature_projection import FeatureProjector
 from banprofil.height_profile import HeightProfileBuilder
 from banprofil.master_network_analyzer import MasterNetworkAnalyzer
 from banprofil.net_jvg_resolver import NetJvgResolver
@@ -177,6 +178,24 @@ def demo_net_jvg_resolver() -> None:
     print(json.dumps(resolver.recommend_next_steps(), indent=2, ensure_ascii=False))
 
 
+def demo_feature_projection() -> None:
+    """
+    Kör första feature projection ovanpå traverserad Net_JVG-korridor.
+
+    Returns
+    -------
+    None
+        Funktionen skriver kandidatstatistik till standard output.
+    """
+    resolver = NetJvgResolver.from_config_file()
+    links = resolver.load_links(limit=1)
+    traversal = resolver.traverse_from_node(start_node_oid=links[0].start_node_oid, target_length_m=50000.0)
+    projector = FeatureProjector.from_config_file()
+    projected = projector.project_features_from_traversal(traversal)
+    print("\nFeature projection v1:")
+    print(json.dumps([asdict(item) for item in projected], indent=2, ensure_ascii=False))
+
+
 def main() -> None:
     """
     Kör alla demoexempel för projektet.
@@ -200,6 +219,7 @@ def main() -> None:
         demo_chain_resolver()
         demo_master_network_analysis()
         demo_net_jvg_resolver()
+        demo_feature_projection()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
