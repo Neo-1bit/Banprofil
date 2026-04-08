@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import math
 import struct
+from dataclasses import dataclass
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -9,6 +11,32 @@ from .net_jvg_resolver import NetJvgResolver, TraversalResult
 
 class NetJvgKmlError(Exception):
     """Basundantag för Net_JVG KML-export."""
+
+
+@dataclass(frozen=True, slots=True)
+class TraversalLinkGeometry:
+    """
+    Geometri och traversalmetadata för en traverserad Net_JVG-länk.
+
+    Parameters
+    ----------
+    link_id : int
+        Länkens rad-id.
+    vertices : list[tuple[float, float]]
+        Vertexlista i SWEREF 99 TM.
+    sequence_index : int
+        Länkens position i traverseringsordningen.
+    start_node_oid : str | None
+        Startnod för länken i traversalriktning.
+    end_node_oid : str | None
+        Slutnod för länken i traversalriktning.
+    """
+
+    link_id: int
+    vertices: list[tuple[float, float]]
+    sequence_index: int
+    start_node_oid: str | None = None
+    end_node_oid: str | None = None
 
 
 def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) -> tuple[float, float, float]:
@@ -117,6 +145,154 @@ def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     return points
 
 
+def _distance(point_a: tuple[float, float], point_b: tuple[float, float]) -> float:
+    """
+    Beräknar euklidiskt avstånd mellan två punkter.
+
+    Parameters
+    ----------
+    point_a : tuple[float, float]
+        Första punkt.
+    point_b : tuple[float, float]
+        Andra punkt.
+
+    Returns
+    -------
+    float
+        Avstånd i meter.
+    """
+    return math.hypot(point_a[0] - point_b[0], point_a[1] - point_b[1])
+
+
+def _load_traversal_link_geometries(
+    resolver: NetJvgResolver,
+    traversal: TraversalResult,
+) -> list[TraversalLinkGeometry]:
+    """
+    Läser geometrier för traverserade länkar i traversalordning.
+
+    Parameters
+    ----------
+    resolver : NetJvgResolver
+        Resolver med åtkomst till master-GPKG.
+    traversal : TraversalResult
+        Traverserad korridor.
+
+    Returns
+    -------
+    list[TraversalLinkGeometry]
+        Traverserade länkar med geometri i traversalordning.
+    """
+    if not traversal.traversed_link_ids:
+        return []
+
+    link_id_to_index = {link_id: index for index, link_id in enumerate(traversal.traversed_link_ids)}
+    rows = resolver.gpkg.fetch_rows(
+        "Net_JVG_Link",
+        limit=50000,
+        columns=["id", "geom", "START_NODE_OID", "END_NODE_OID"],
+    )
+    traversed_nodes = traversal.traversed_node_oids
+    geometries: list[TraversalLinkGeometry] = []
+    for row in rows:
+        link_id = int(row["id"])
+        if link_id not in link_id_to_index:
+            continue
+        vertices = _decode_link_vertices(row["geom"])
+        if not vertices:
+            continue
+        sequence_index = link_id_to_index[link_id]
+        start_node_oid = None
+        end_node_oid = None
+        if sequence_index + 1 < len(traversed_nodes):
+            start_node_oid = traversed_nodes[sequence_index]
+            end_node_oid = traversed_nodes[sequence_index + 1]
+        row_start_node_oid = str(row["START_NODE_OID"])
+        row_end_node_oid = str(row["END_NODE_OID"])
+        if start_node_oid == row_end_node_oid and end_node_oid == row_start_node_oid:
+            vertices.reverse()
+        geometries.append(
+            TraversalLinkGeometry(
+                link_id=link_id,
+                vertices=vertices,
+                sequence_index=sequence_index,
+                start_node_oid=start_node_oid,
+                end_node_oid=end_node_oid,
+            )
+        )
+    geometries.sort(key=lambda item: item.sequence_index)
+    return geometries
+
+
+def _sequence_traversal_vertices(
+    link_geometries: list[TraversalLinkGeometry],
+    max_gap_m: float = 25.0,
+) -> list[list[tuple[float, float]]]:
+    """
+    Syr ihop traverserade länkar till längre sammanhängande linjesträngar.
+
+    Parameters
+    ----------
+    link_geometries : list[TraversalLinkGeometry]
+        Traverserade länkar med geometri i traversalordning.
+    max_gap_m : float, optional
+        Max tillåtet gap mellan länkändar innan en ny delsträcka startas.
+
+    Returns
+    -------
+    list[list[tuple[float, float]]]
+        En eller flera sammanhängande vertexsekvenser.
+    """
+    sequences: list[list[tuple[float, float]]] = []
+    current_sequence: list[tuple[float, float]] = []
+
+    for link_geometry in link_geometries:
+        vertices = list(link_geometry.vertices)
+        if len(vertices) < 2:
+            continue
+
+        if not current_sequence:
+            current_sequence = vertices
+            continue
+
+        start_gap = _distance(current_sequence[-1], vertices[0])
+
+        if start_gap <= max_gap_m:
+            if _distance(current_sequence[-1], vertices[0]) <= 1e-6:
+                current_sequence.extend(vertices[1:])
+            else:
+                current_sequence.extend(vertices)
+            continue
+
+        sequences.append(current_sequence)
+        current_sequence = vertices
+
+    if current_sequence:
+        sequences.append(current_sequence)
+    return sequences
+
+
+def _vertices_to_kml_coordinates(vertices: list[tuple[float, float]]) -> str:
+    """
+    Omvandlar SWEREF-vertices till KML-koordinatsträng.
+
+    Parameters
+    ----------
+    vertices : list[tuple[float, float]]
+        Vertexlista i SWEREF 99 TM.
+
+    Returns
+    -------
+    str
+        KML-koordinater i WGS84.
+    """
+    coords: list[str] = []
+    for x, y in vertices:
+        lon, lat, alt = sweref99tm_to_wgs84(x, y, 0.0)
+        coords.append(f"{lon},{lat},{alt}")
+    return " ".join(coords)
+
+
 def export_traversal_kml(
     resolver: NetJvgResolver,
     traversal: TraversalResult,
@@ -125,6 +301,10 @@ def export_traversal_kml(
 ) -> Path:
     """
     Exporterar traverserad Net_JVG-korridor till KML.
+
+    Sequencing v3 ordnar traverserade länkar i traversalordning, vänder vid
+    behov länkgeometrierna och syr ihop intilliggande länkar till längre
+    linjesträngar när ändpunkterna ligger nära varandra.
 
     Parameters
     ----------
@@ -147,35 +327,42 @@ def export_traversal_kml(
     NetJvgKmlError
         Om inga geometrier kunde hittas för traverseringen.
     """
-    link_ids = set(traversal.traversed_link_ids)
-    rows = resolver.gpkg.fetch_rows("Net_JVG_Link", limit=50000, columns=["id", "geom"])
+    link_geometries = _load_traversal_link_geometries(resolver=resolver, traversal=traversal)
+    if not link_geometries:
+        raise NetJvgKmlError("No Net_JVG link geometries found for traversal")
+
+    sequences = _sequence_traversal_vertices(link_geometries=link_geometries)
     placemarks = []
-    for row in rows:
-        if int(row["id"]) not in link_ids:
-            continue
-        vertices = _decode_link_vertices(row["geom"])
-        if not vertices:
-            continue
-        coords = []
-        for x, y in vertices:
-            lon, lat, alt = sweref99tm_to_wgs84(x, y, 0.0)
-            coords.append(f"{lon},{lat},{alt}")
+    for index, sequence in enumerate(sequences, start=1):
         placemarks.append(
             f"""
     <Placemark>
-      <name>{escape(name)} link {row['id']}</name>
+      <name>{escape(name)} sekvens {index}</name>
+      <description>{escape(f'Länkar: {len(link_geometries)}. Vertex i sekvens: {len(sequence)}.')}</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>3</width></LineStyle>
+        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
-        <coordinates>{' '.join(coords)}</coordinates>
+        <coordinates>{_vertices_to_kml_coordinates(sequence)}</coordinates>
       </LineString>
     </Placemark>"""
         )
 
-    if not placemarks:
-        raise NetJvgKmlError("No Net_JVG link geometries found for traversal")
+    for link_geometry in link_geometries:
+        placemarks.append(
+            f"""
+    <Placemark>
+      <name>{escape(name)} link {link_geometry.link_id}</name>
+      <Style>
+        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+      </Style>
+      <LineString>
+        <tessellate>1</tessellate>
+        <coordinates>{_vertices_to_kml_coordinates(link_geometry.vertices)}</coordinates>
+      </LineString>
+    </Placemark>"""
+        )
 
     content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">

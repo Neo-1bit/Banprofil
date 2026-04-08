@@ -125,6 +125,8 @@ class TraversalResult:
         Ackumulerad längd i meter.
     traversed_link_ids : list[int]
         Länk-id:n i traverserad ordning.
+    traversed_node_oids : list[str]
+        Nod-OID:n i den ordning traverseringen följde dem.
     notes : str
         Kommentar om traversalens karaktär.
     """
@@ -135,6 +137,7 @@ class TraversalResult:
     visited_link_count: int
     accumulated_length_m: float
     traversed_link_ids: list[int]
+    traversed_node_oids: list[str]
     notes: str
 
 
@@ -386,6 +389,7 @@ class NetJvgResolver:
         visited_nodes: set[str] = {start_node_oid}
         visited_links: set[int] = set()
         traversed_link_ids: list[int] = []
+        traversed_node_oids: list[str] = [start_node_oid]
         accumulated = 0.0
         current_node = start_node_oid
         previous_direction: tuple[float, float] | None = None
@@ -410,6 +414,7 @@ class NetJvgResolver:
             traversed_link_ids.append(best_link.id)
             accumulated += best_link.length
             current_node = next_node
+            traversed_node_oids.append(current_node)
             visited_nodes.add(current_node)
             previous_direction = best_direction
 
@@ -420,6 +425,7 @@ class NetJvgResolver:
             visited_link_count=len(visited_links),
             accumulated_length_m=accumulated,
             traversed_link_ids=traversed_link_ids,
+            traversed_node_oids=traversed_node_oids,
             notes="Traversal v2 använder enkel riktningskontinuitet för att följa huvudkorridoren och undvika grenar.",
         )
 
