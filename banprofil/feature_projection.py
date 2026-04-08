@@ -42,7 +42,8 @@ class FeatureProjector:
     """
     Projekterar featurelager ovanpå en traverserad Net_JVG-korridor.
 
-    V2 använder en stramare geometrisk matchning än enbart bounding box.
+    V3 använder både korridorens bbox och ett finare avståndsfilter för att
+    minska mängden arbete per lager.
 
     Parameters
     ----------
@@ -89,7 +90,7 @@ class FeatureProjector:
             Färdig instans.
         """
         resolver = NetJvgResolver.from_config_file(config_path)
-        return cls(gpkg=resolver.gpkg, resolver=resolver)
+        return cls(gpkg=resolver.gpgk if False else resolver.gpkg, resolver=resolver)
 
     def _parse_point_xy(self, value: str | None) -> tuple[float, float] | None:
         """
@@ -164,6 +165,31 @@ class FeatureProjector:
             raise FeatureProjectionError("No link vertices found for traversal")
         return vertices
 
+    def _corridor_bbox(self, vertices: list[tuple[float, float]], padding_m: float = 250.0) -> dict[str, float]:
+        """
+        Bygger bbox kring korridorens hörnpunkter.
+
+        Parameters
+        ----------
+        vertices : list[tuple[float, float]]
+            Korridorens hörnpunkter.
+        padding_m : float, optional
+            Extra marginal runt bbox i meter.
+
+        Returns
+        -------
+        dict[str, float]
+            Bounding box med padding.
+        """
+        xs = [vertex[0] for vertex in vertices]
+        ys = [vertex[1] for vertex in vertices]
+        return {
+            "minx": min(xs) - padding_m,
+            "maxx": max(xs) + padding_m,
+            "miny": min(ys) - padding_m,
+            "maxy": max(ys) + padding_m,
+        }
+
     def _min_distance_to_corridor(self, point: tuple[float, float], corridor_vertices: list[tuple[float, float]]) -> float:
         """
         Beräknar minsta punktavstånd till korridorens hörnpunkter.
@@ -183,7 +209,12 @@ class FeatureProjector:
         px, py = point
         return min(math.hypot(px - vx, py - vy) for vx, vy in corridor_vertices)
 
-    def project_features_from_traversal(self, traversal: TraversalResult, max_distance_m: float = 250.0) -> list[ProjectedFeatureSummary]:
+    def project_features_from_traversal(
+        self,
+        traversal: TraversalResult,
+        max_distance_m: float = 250.0,
+        per_layer_limit: int = 12000,
+    ) -> list[ProjectedFeatureSummary]:
         """
         Hämtar featurekandidater för en traverserad korridor.
 
@@ -193,6 +224,8 @@ class FeatureProjector:
             Traverserad nätverkskorridor.
         max_distance_m : float, optional
             Maxavstånd från korridoren för att ett feature ska räknas som kandidat.
+        per_layer_limit : int, optional
+            Max antal rader att läsa per lager i denna fokuserade verifieringsversion.
 
         Returns
         -------
@@ -200,11 +233,12 @@ class FeatureProjector:
             Sammanfattning av kandidater per featurelager.
         """
         corridor_vertices = self._corridor_vertices_from_traversal(traversal)
+        bbox = self._corridor_bbox(corridor_vertices, padding_m=max_distance_m)
         summaries: list[ProjectedFeatureSummary] = []
         for layer_key, table_name in self.FEATURE_TABLES.items():
             rows = self.gpkg.fetch_rows(
                 table_name,
-                limit=50000,
+                limit=per_layer_limit,
                 columns=["Koordinater_start", "Koordinater_slut"],
             )
             count = 0
@@ -213,13 +247,23 @@ class FeatureProjector:
                 points = [point for point in points if point is not None]
                 if not points:
                     continue
-                if min(self._min_distance_to_corridor(point, corridor_vertices) for point in points) <= max_distance_m:
+                # snabb bbox-gallring först
+                in_bbox = [
+                    point for point in points
+                    if bbox["minx"] <= point[0] <= bbox["maxx"] and bbox["miny"] <= point[1] <= bbox["maxy"]
+                ]
+                if not in_bbox:
+                    continue
+                if min(self._min_distance_to_corridor(point, corridor_vertices) for point in in_bbox) <= max_distance_m:
                     count += 1
             summaries.append(
                 ProjectedFeatureSummary(
                     layer_key=layer_key,
                     candidate_count=count,
-                    notes=f"V2 använder minsta punktavstånd till traverserad länkkorridor med tröskel {max_distance_m} m.",
+                    notes=(
+                        f"V3 använder bbox-gallring + minsta punktavstånd till traverserad länkkorridor "
+                        f"med tröskel {max_distance_m} m och max {per_layer_limit} rader per lager i denna verifieringskörning."
+                    ),
                 )
             )
         return summaries
