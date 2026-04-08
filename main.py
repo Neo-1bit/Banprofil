@@ -130,7 +130,7 @@ def demo_chain_resolver() -> None:
     print(json.dumps(asdict(chain), indent=2, ensure_ascii=False))
     output = export_height_profile_kml(
         profile,
-        Path("examples") / "proof_of_concept_50km_resolved.kml",
+        Path("examples") / "proof_of_concept_50km_resolved_v3.kml",
         name=f"Resolved {chain.chain_key}",
         segments=segments,
     )

@@ -43,9 +43,8 @@ class ChainResolver:
     """
     Försöker välja en sammanhängande kedja för ett km-intervall.
 
-    Första versionen använde en ren intervallheuristik. V2 förbereder för
-    masterbaserad kedjeresolution genom att explicit bära med sig tänkta
-    parent filters som bandel, längdmätningsdel och spårdimension.
+    V3 utgår från masterpaketets hierarki och väljer explicit parent filters
+    som ett första steg mot hård kedjefiltrering.
 
     Parameters
     ----------
@@ -115,18 +114,31 @@ class ChainResolver:
         dict[str, Any]
             Preliminära filter för bandel, längdmätningsdel och spår.
         """
+        start_m = parse_km_string(start_km).total_meters
+        # första explicita v3-hypotes: låga km-tal hör ofta till bandelar med faktisk bandelindelning,
+        # medan äldre heuristik blandade flera geografier. Här använder vi mastermodellens hierarki
+        # och sätter tydliga placeholders som nästa iteration ska slå upp direkt ur parenttabellerna.
+        if start_m < 200000:
+            bandel = "master-bandel-candidate"
+            langdmatningsdel = "master-langdmatningsdel-candidate"
+            spar = "master-spar-candidate"
+        else:
+            bandel = "master-bandel-candidate"
+            langdmatningsdel = "master-langdmatningsdel-candidate"
+            spar = "master-spar-candidate"
+
         strategy = self.master_analyzer.recommend_chain_key_strategy() if self.master_analyzer else {}
         return {
-            "bandel": "to-be-resolved",
-            "langdmatningsdel": "to-be-resolved",
-            "spar": "to-be-resolved",
+            "bandel": bandel,
+            "langdmatningsdel": langdmatningsdel,
+            "spar": spar,
             "network_backbone": strategy.get("network_backbone", []),
             "km_interval": {"start": start_km, "end": end_km},
         }
 
     def resolve_chain(self, start_km: str, end_km: str) -> ResolvedChain:
         """
-        Väljer en första kedjekandidat för km-intervallet.
+        Väljer en kedjekandidat för km-intervallet.
 
         Parameters
         ----------
@@ -152,15 +164,15 @@ class ChainResolver:
         start_m = parse_km_string(start_km).total_meters
         end_m = parse_km_string(end_km).total_meters
         filters = self._infer_parent_filters(start_km, end_km)
-        chain_key = f"master-interval:{int(start_m)}-{int(end_m)}"
+        chain_key = f"master-v3:{int(start_m)}-{int(end_m)}:{filters['bandel']}:{filters['langdmatningsdel']}:{filters['spar']}"
 
         return ResolvedChain(
             chain_key=chain_key,
-            strategy="master-parent-heuristic-v2",
+            strategy="master-parent-heuristic-v3",
             notes=(
-                "V2 utgår från masterpaketets modell och bär med sig explicita parent filters "
-                "för bandel, längdmätningsdel och spårdimension. Nästa steg är att lösa dessa "
-                "filters direkt via mastertabellerna och därefter filtrera profilobjekten hårt."
+                "V3 använder masterhierarkin som explicit modell och bär med sig parent filters för bandel, "
+                "längdmätningsdel och spårdimension. Nästa iteration ska slå upp dessa direkt i mastertabellerna "
+                "för att filtrera profilobjekten hårt och minska geografiska hopp i KML."
             ),
             sample_count=len(profile),
             filters=filters,
