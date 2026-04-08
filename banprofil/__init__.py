@@ -10,6 +10,14 @@ from .master_network_analyzer import (
     MasterNetworkAnalyzerError,
     NetworkTableSummary,
 )
+from .net_jvg_resolver import (
+    NetJvgLink,
+    NetJvgLinkSequence,
+    NetJvgNetworkSummary,
+    NetJvgNode,
+    NetJvgResolver,
+    NetJvgResolverError,
+)
 from .profile_chain import KmValue, ProfileChainIndex, format_km_value, parse_km_string
 from .trafikverket_gpkg import LayerInfo, TrafikverketGeoPackage
 
@@ -28,6 +36,12 @@ __all__ = [
     "LayerInfo",
     "MasterNetworkAnalyzer",
     "MasterNetworkAnalyzerError",
+    "NetJvgLink",
+    "NetJvgLinkSequence",
+    "NetJvgNetworkSummary",
+    "NetJvgNode",
+    "NetJvgResolver",
+    "NetJvgResolverError",
     "NetworkTableSummary",
     "ProfileChainIndex",
     "ResolvedChain",

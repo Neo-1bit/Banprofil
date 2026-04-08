@@ -9,6 +9,7 @@ from banprofil.chain_analysis import ChainAnalyzer
 from banprofil.chain_resolver import ChainResolver
 from banprofil.height_profile import HeightProfileBuilder
 from banprofil.master_network_analyzer import MasterNetworkAnalyzer
+from banprofil.net_jvg_resolver import NetJvgResolver
 from banprofil.kml_export import export_height_profile_kml
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
 from banprofil.profile_chain import ProfileChainError, ProfileChainIndex
@@ -155,6 +156,23 @@ def demo_master_network_analysis() -> None:
     print(json.dumps(analyzer.recommend_chain_key_strategy(), indent=2, ensure_ascii=False))
 
 
+def demo_net_jvg_resolver() -> None:
+    """
+    Kör första nätverksförst-resolvern för Net_JVG-lagren.
+
+    Returns
+    -------
+    None
+        Funktionen skriver nätverkssammanfattning till standard output.
+    """
+    resolver = NetJvgResolver.from_config_file()
+    summary = resolver.summarize_network()
+    print("\nNet_JVG network summary:")
+    print(json.dumps(asdict(summary), indent=2, ensure_ascii=False))
+    print("\nNet_JVG next steps:")
+    print(json.dumps(resolver.recommend_next_steps(), indent=2, ensure_ascii=False))
+
+
 def main() -> None:
     """
     Kör alla demoexempel för projektet.
@@ -177,6 +195,7 @@ def main() -> None:
         demo_chain_analysis()
         demo_chain_resolver()
         demo_master_network_analysis()
+        demo_net_jvg_resolver()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
