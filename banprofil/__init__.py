@@ -1,4 +1,5 @@
 from .chain_analysis import AmbiguousInterval, ChainAnalyzer, ChainCandidate
+from .chain_resolver import ChainResolver, ChainResolverError, ResolvedChain
 from .coordinate_transform import SwerefPoint, wgs84_to_sweref99tm
 from .height_profile import HeightProfileBuilder, HeightSample, HeightSegment
 from .kml_export import export_height_profile_kml
@@ -10,6 +11,9 @@ __all__ = [
     "AmbiguousInterval",
     "ChainAnalyzer",
     "ChainCandidate",
+    "ChainResolver",
+    "ChainResolverError",
+    "ResolvedChain",
     "HeightProfileBuilder",
     "HeightSample",
     "HeightSegment",

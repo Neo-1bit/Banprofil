@@ -6,6 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from banprofil.chain_analysis import ChainAnalyzer
+from banprofil.chain_resolver import ChainResolver
 from banprofil.height_profile import HeightProfileBuilder
 from banprofil.kml_export import export_height_profile_kml
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
@@ -113,6 +114,28 @@ def demo_chain_analysis() -> None:
     print(json.dumps([asdict(interval) for interval in analyzer.find_ambiguous_intervals(limit=5)], indent=2, ensure_ascii=False, default=str))
 
 
+def demo_chain_resolver() -> None:
+    """
+    Kör första versionen av kedjeresolvern och exporterar kedjebunden KML.
+
+    Returns
+    -------
+    None
+        Funktionen skriver resolverresultat till standard output.
+    """
+    resolver = ChainResolver.from_config_file()
+    chain, profile, segments = resolver.build_resolved_profile(start_km="75+935", end_km="125+935")
+    print("\nVald kedja:")
+    print(json.dumps(asdict(chain), indent=2, ensure_ascii=False))
+    output = export_height_profile_kml(
+        profile,
+        Path("examples") / "proof_of_concept_50km_resolved.kml",
+        name=f"Resolved {chain.chain_key}",
+        segments=segments,
+    )
+    print(f"Kedjebunden KML exporterad till: {output}")
+
+
 def main() -> None:
     """
     Kör alla demoexempel för projektet.
@@ -133,6 +156,7 @@ def main() -> None:
         demo_height_profile()
         demo_kml_export()
         demo_chain_analysis()
+        demo_chain_resolver()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
