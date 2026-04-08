@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import math
 import re
+import struct
 from dataclasses import dataclass
 from typing import Any
 
@@ -38,10 +40,9 @@ class ProjectedFeatureSummary:
 
 class FeatureProjector:
     """
-    Första projektionen av featurelager ovanpå en traverserad Net_JVG-korridor.
+    Projekterar featurelager ovanpå en traverserad Net_JVG-korridor.
 
-    Den här första versionen använder korridorens geometriområde som grov
-    kandidatfilter. Nästa version bör projicera features mer exakt mot länkar.
+    V2 använder en stramare geometrisk matchning än enbart bounding box.
 
     Parameters
     ----------
@@ -111,45 +112,36 @@ class FeatureProjector:
             return None
         return float(match.group("e")), float(match.group("n"))
 
-    def _corridor_bbox_from_traversal(self, traversal: TraversalResult) -> dict[str, float]:
+    def _decode_link_vertices(self, geom: bytes) -> list[tuple[float, float]]:
         """
-        Beräknar grov bbox för traverserade länkar.
+        Dekodar punktsekvens ur GeoPackage-linjegeometri.
 
         Parameters
         ----------
-        traversal : TraversalResult
-            Resultat från traversal.
+        geom : bytes
+            GeoPackage-binär geometri för en länk.
 
         Returns
         -------
-        dict[str, float]
-            Bounding box för traverserade länkar.
+        list[tuple[float, float]]
+            Lista av hörnpunkter i SWEREF 99 TM.
         """
-        link_id_set = set(traversal.traversed_link_ids)
-        rows = self.gpkg.fetch_rows("Net_JVG_Link", limit=50000, columns=["id", "geom"])
-        boxes = []
-        for row in rows:
-            if int(row["id"]) not in link_id_set:
-                continue
-            geom = row["geom"]
-            if not isinstance(geom, bytes) or len(geom) < 40:
-                continue
-            import struct
+        if not isinstance(geom, bytes) or len(geom) < 64:
+            return []
+        num_points = struct.unpack('<I', geom[57:61])[0]
+        offset = 61
+        points = []
+        for _ in range(num_points):
+            if offset + 16 > len(geom):
+                break
+            x, y = struct.unpack('<dd', geom[offset:offset + 16])
+            points.append((x, y))
+            offset += 16
+        return points
 
-            minx, maxx, miny, maxy = struct.unpack("<dddd", geom[8:40])
-            boxes.append((minx, maxx, miny, maxy))
-        if not boxes:
-            raise FeatureProjectionError("No link geometries found for traversal")
-        return {
-            "minx": min(item[0] for item in boxes),
-            "maxx": max(item[1] for item in boxes),
-            "miny": min(item[2] for item in boxes),
-            "maxy": max(item[3] for item in boxes),
-        }
-
-    def project_features_from_traversal(self, traversal: TraversalResult) -> list[ProjectedFeatureSummary]:
+    def _corridor_vertices_from_traversal(self, traversal: TraversalResult) -> list[tuple[float, float]]:
         """
-        Hämtar grova featurekandidater för en traverserad korridor.
+        Hämtar alla länkpunkter för en traverserad korridor.
 
         Parameters
         ----------
@@ -158,10 +150,56 @@ class FeatureProjector:
 
         Returns
         -------
+        list[tuple[float, float]]
+            Länkpunkter för korridoren.
+        """
+        link_id_set = set(traversal.traversed_link_ids)
+        rows = self.gpkg.fetch_rows("Net_JVG_Link", limit=50000, columns=["id", "geom"])
+        vertices: list[tuple[float, float]] = []
+        for row in rows:
+            if int(row["id"]) not in link_id_set:
+                continue
+            vertices.extend(self._decode_link_vertices(row["geom"]))
+        if not vertices:
+            raise FeatureProjectionError("No link vertices found for traversal")
+        return vertices
+
+    def _min_distance_to_corridor(self, point: tuple[float, float], corridor_vertices: list[tuple[float, float]]) -> float:
+        """
+        Beräknar minsta punktavstånd till korridorens hörnpunkter.
+
+        Parameters
+        ----------
+        point : tuple[float, float]
+            Punkt som ska testas.
+        corridor_vertices : list[tuple[float, float]]
+            Korridorens hörnpunkter.
+
+        Returns
+        -------
+        float
+            Minsta avstånd i meter.
+        """
+        px, py = point
+        return min(math.hypot(px - vx, py - vy) for vx, vy in corridor_vertices)
+
+    def project_features_from_traversal(self, traversal: TraversalResult, max_distance_m: float = 250.0) -> list[ProjectedFeatureSummary]:
+        """
+        Hämtar featurekandidater för en traverserad korridor.
+
+        Parameters
+        ----------
+        traversal : TraversalResult
+            Traverserad nätverkskorridor.
+        max_distance_m : float, optional
+            Maxavstånd från korridoren för att ett feature ska räknas som kandidat.
+
+        Returns
+        -------
         list[ProjectedFeatureSummary]
             Sammanfattning av kandidater per featurelager.
         """
-        bbox = self._corridor_bbox_from_traversal(traversal)
+        corridor_vertices = self._corridor_vertices_from_traversal(traversal)
         summaries: list[ProjectedFeatureSummary] = []
         for layer_key, table_name in self.FEATURE_TABLES.items():
             rows = self.gpkg.fetch_rows(
@@ -171,19 +209,17 @@ class FeatureProjector:
             )
             count = 0
             for row in rows:
-                for key in ("Koordinater_start", "Koordinater_slut"):
-                    point = self._parse_point_xy(row.get(key))
-                    if not point:
-                        continue
-                    x, y = point
-                    if bbox["minx"] <= x <= bbox["maxx"] and bbox["miny"] <= y <= bbox["maxy"]:
-                        count += 1
-                        break
+                points = [self._parse_point_xy(row.get("Koordinater_start")), self._parse_point_xy(row.get("Koordinater_slut"))]
+                points = [point for point in points if point is not None]
+                if not points:
+                    continue
+                if min(self._min_distance_to_corridor(point, corridor_vertices) for point in points) <= max_distance_m:
+                    count += 1
             summaries.append(
                 ProjectedFeatureSummary(
                     layer_key=layer_key,
                     candidate_count=count,
-                    notes="Första projektionen använder korridorens bbox som grovt filter. Nästa steg är exakt länkprojektion.",
+                    notes=f"V2 använder minsta punktavstånd till traverserad länkkorridor med tröskel {max_distance_m} m.",
                 )
             )
         return summaries

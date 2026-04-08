@@ -1,66 +1,62 @@
 # Banprofil
 
-Python-modul för kommunikation med Lantmäteriets Markhöjd Direkt API och läsning av Trafikverkets GeoPackage-data.
+Python-modul för analys av Trafikverkets järnvägsnät med fokus på `Net_JVG` som topologisk ryggrad.
 
 ## Innehåll
 
-- `banprofil/lantmateriet_client.py` - klient för tokenhämtning, höjdanrop, batchstöd och felhantering
-- `banprofil/coordinate_transform.py` - omvandling från WGS84 (EPSG:4326) till SWEREF 99 TM (EPSG:3006)
-- `banprofil/trafikverket_gpkg.py` - läsare för Trafikverkets GeoPackage-lager
-- `banprofil/profile_chain.py` - km-tal och profilkedja längs spåret
-- `banprofil/height_profile.py` - bygger höjdprofil med Trafikverket som primär källa och Lantmäteriet som fallback
 - `banprofil/config_loader.py` - laddar `config.json` och faller tillbaka till `config.example.json`
-- `main.py` - enkel körbar testfil
-- `config.example.json` - mall för credentials och lokala datakällor
-- `.gitignore` - skyddar lokala hemligheter
+- `banprofil/coordinate_transform.py` - omvandling från WGS84 (EPSG:4326) till SWEREF 99 TM (EPSG:3006)
+- `banprofil/trafikverket_gpkg.py` - generell läsare för Trafikverkets GeoPackage-lager
+- `banprofil/master_network_analyzer.py` - analys av masterpaketets nätverk och föräldralager
+- `banprofil/net_jvg_resolver.py` - nätverksförst-resolver och traversal över `Net_JVG`
+- `banprofil/feature_projection.py` - första projektion av featurelager ovanpå traverserad `Net_JVG`-korridor
+- `main.py` - fokuserad demo för masteranalys, traversal och feature projection
 
 ## Konfiguration
 
 - `config.json` används om den finns
 - annars används `config.example.json` som fallback
-- `config.json` är ignorerad i git och är avsedd för riktiga lokala nycklar och filvägar
+- `config.json` är ignorerad i git och är avsedd för riktiga lokala filvägar
 
 Exempel:
 
 ```json
 {
-  "consumer_key": "...",
-  "consumer_secret": "...",
-  "trafikverket_gpkg_path": "C:/data/trafikverket/Trafikverket_Sweref_677446.gpkg",
-  "trafikverket_gpkg_glob": "C:/data/trafikverket/**/*.gpkg"
+  "trafikverket_gpkg_path": "C:/data/trafikverket/master/Master_All_194445.gpkg",
+  "trafikverket_gpkg_glob": "C:/data/trafikverket/master/**/*.gpkg"
 }
 ```
 
-Tips:
-- använd `trafikverket_gpkg_path` om du vet exakt filnamn
-- använd `trafikverket_gpkg_glob` om filnamnet ändras vid varje ny leverans, då väljs senaste matchande `.gpkg`
+## Arkitektur just nu
 
-## Exempel, höjdprofil
+Projektet utgår nu från expertbekräftad modell:
+- `Net_JVG_*` är själva järnvägsnätet
+- övriga BIS-lager är features på nätverket
 
-```python
-from banprofil.height_profile import HeightProfileBuilder
+Det betyder att Banprofil nu bygger vidare på:
+1. `Net_JVG_Node`
+2. `Net_JVG_Link`
+3. `Net_JVG_LinkSequence`
 
-builder = HeightProfileBuilder.from_config_file("config.json")
-profile = builder.build_height_profile(start_km="1180+200", end_km="1180+320")
-```
+Och först därefter projiceras featurelager som:
+- `raklinje`
+- `lutning`
+- `cirkularkurva`
+- `overgangskurva`
 
-Varje sample i profilen innehåller bland annat:
-- km-tal
-- e, n
-- z
-- källa (`trafikverket` eller `lantmateriet`)
-- metadata som lutning eller radie där det finns
-
-## Data-prioritet
-
-Höjdprofilen prioriterar:
-1. **Trafikverket**, via Z-värden i `Koordinater_start` och `Koordinater_slut`
-2. **Lantmäteriet**, som fallback om Trafikverket saknar höjd för en punkt
-
-Det här är en bra grund för att visa hur spåret ser ut framför ett tåg på en given sträcka.
-
-## Kör testfilen
+## Demo
 
 ```bash
 python main.py
 ```
+
+Det kör:
+- master network analysis
+- `Net_JVG` traversal v1
+- feature projection v2
+
+## Nästa steg
+
+- traversal längs bättre vald korridor än första startnod
+- exakt projektion av featuresegment mot traverserade länkar
+- senare återkoppling till höjdprofil och exportformat ovanpå korrekt nätverkskedja
