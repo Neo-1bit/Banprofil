@@ -226,7 +226,7 @@ def _load_traversal_link_geometries(
 
 def _sequence_traversal_vertices(
     link_geometries: list[TraversalLinkGeometry],
-    max_gap_m: float = 25.0,
+    max_gap_m: float = 500.0,
 ) -> list[list[tuple[float, float]]]:
     """
     Syr ihop traverserade länkar till längre sammanhängande linjesträngar.
@@ -304,7 +304,9 @@ def export_traversal_kml(
 
     Sequencing v3 ordnar traverserade länkar i traversalordning, vänder vid
     behov länkgeometrierna och syr ihop intilliggande länkar till längre
-    linjesträngar när ändpunkterna ligger nära varandra.
+    linjesträngar när ändpunkterna ligger rimligt nära varandra. Ett större
+    gap tillåts eftersom Net_JVG ofta innehåller relevanta delsegment med
+    diskreta avbrott i själva länkgeometrierna.
 
     Parameters
     ----------
