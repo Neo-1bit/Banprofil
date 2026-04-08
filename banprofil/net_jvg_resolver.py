@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+import struct
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Any
@@ -45,6 +47,8 @@ class NetJvgLink:
         Längd i meter.
     extent_length : float
         Utbredningslängd i meter.
+    geom : bytes | None
+        GeoPackage-geometri för länken.
     """
 
     id: int
@@ -53,6 +57,7 @@ class NetJvgLink:
     end_node_oid: str
     length: float
     extent_length: float
+    geom: bytes | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -195,7 +200,7 @@ class NetJvgResolver:
         rows = self.gpkg.fetch_rows("Net_JVG_Node", limit=row_limit, columns=["OID"])
         return [NetJvgNode(oid=str(row["OID"])) for row in rows]
 
-    def load_links(self, limit: int | None = None) -> list[NetJvgLink]:
+    def load_links(self, limit: int | None = None, include_geom: bool = False) -> list[NetJvgLink]:
         """
         Läser länkar från `Net_JVG_Link`.
 
@@ -203,6 +208,8 @@ class NetJvgResolver:
         ----------
         limit : int | None, optional
             Max antal länkar att läsa. `None` läser alla.
+        include_geom : bool, optional
+            Om `True` inkluderas geometri i resultatet.
 
         Returns
         -------
@@ -210,18 +217,17 @@ class NetJvgResolver:
             Länkar i nätverket.
         """
         row_limit = limit if limit is not None else self.gpkg.count_rows("Net_JVG_Link")
-        rows = self.gpkg.fetch_rows(
-            "Net_JVG_Link",
-            limit=row_limit,
-            columns=[
-                "id",
-                "LINKSEQUENCE_OID",
-                "START_NODE_OID",
-                "END_NODE_OID",
-                "LENGTH",
-                "EXTENT_LENGTH",
-            ],
-        )
+        columns = [
+            "id",
+            "LINKSEQUENCE_OID",
+            "START_NODE_OID",
+            "END_NODE_OID",
+            "LENGTH",
+            "EXTENT_LENGTH",
+        ]
+        if include_geom:
+            columns.append("geom")
+        rows = self.gpkg.fetch_rows("Net_JVG_Link", limit=row_limit, columns=columns)
         return [
             NetJvgLink(
                 id=int(row["id"]),
@@ -230,6 +236,7 @@ class NetJvgResolver:
                 end_node_oid=str(row["END_NODE_OID"]),
                 length=float(row["LENGTH"]),
                 extent_length=float(row["EXTENT_LENGTH"]),
+                geom=row.get("geom"),
             )
             for row in rows
         ]
@@ -262,6 +269,36 @@ class NetJvgResolver:
             )
             for row in rows
         ]
+
+    def _link_direction(self, link: NetJvgLink, from_node_oid: str) -> tuple[float, float]:
+        """
+        Beräknar ungefärlig riktning för en länk från en viss nod.
+
+        Parameters
+        ----------
+        link : NetJvgLink
+            Länk som ska bedömas.
+        from_node_oid : str
+            Nod som traversaln kommer från.
+
+        Returns
+        -------
+        tuple[float, float]
+            Normaliserad riktningsvektor.
+        """
+        if not link.geom or len(link.geom) < 40:
+            return (0.0, 0.0)
+        minx, maxx, miny, maxy = struct.unpack('<dddd', link.geom[8:40])
+        if from_node_oid == link.start_node_oid:
+            dx = maxx - minx
+            dy = maxy - miny
+        else:
+            dx = minx - maxx
+            dy = miny - maxy
+        length = math.hypot(dx, dy)
+        if length == 0:
+            return (0.0, 0.0)
+        return (dx / length, dy / length)
 
     def summarize_network(self, limit_links: int | None = 5000) -> NetJvgNetworkSummary:
         """
@@ -315,8 +352,8 @@ class NetJvgResolver:
         """
         Traverserar nätverket framåt från en startnod tills önskad längd uppnåtts.
 
-        Traverseringen använder en enkel grafgång över länkar och fungerar som
-        första traversalprototyp, inte som slutlig ruttmotor.
+        Traversal v2 försöker hålla riktning genom att välja nästa länk som bäst
+        fortsätter föregående riktning och undviker att svälla ut i sidogrenar.
 
         Parameters
         ----------
@@ -337,7 +374,7 @@ class NetJvgResolver:
         NetJvgResolverError
             Om startnoden inte finns i den lästa grafen.
         """
-        links = self.load_links(limit=limit_links)
+        links = self.load_links(limit=limit_links, include_geom=True)
         adjacency: dict[str, list[tuple[str, NetJvgLink]]] = defaultdict(list)
         for link in links:
             adjacency[link.start_node_oid].append((link.end_node_oid, link))
@@ -346,27 +383,35 @@ class NetJvgResolver:
         if start_node_oid not in adjacency:
             raise NetJvgResolverError(f"Start node not found in traversal graph: {start_node_oid}")
 
-        visited_nodes: set[str] = set()
+        visited_nodes: set[str] = {start_node_oid}
         visited_links: set[int] = set()
         traversed_link_ids: list[int] = []
         accumulated = 0.0
-        stack = [start_node_oid]
+        current_node = start_node_oid
+        previous_direction: tuple[float, float] | None = None
 
-        while stack and accumulated < target_length_m:
-            current = stack.pop()
-            if current in visited_nodes:
-                continue
-            visited_nodes.add(current)
-            for neighbor, link in adjacency[current]:
+        while accumulated < target_length_m:
+            candidates = []
+            for neighbor, link in adjacency[current_node]:
                 if link.id in visited_links:
                     continue
-                visited_links.add(link.id)
-                traversed_link_ids.append(link.id)
-                accumulated += link.length
-                if neighbor not in visited_nodes:
-                    stack.append(neighbor)
-                if accumulated >= target_length_m:
-                    break
+                direction = self._link_direction(link, current_node)
+                score = link.length
+                if previous_direction is not None:
+                    score += 1000.0 * (previous_direction[0] * direction[0] + previous_direction[1] * direction[1])
+                candidates.append((score, neighbor, link, direction))
+
+            if not candidates:
+                break
+
+            candidates.sort(key=lambda item: item[0], reverse=True)
+            _, next_node, best_link, best_direction = candidates[0]
+            visited_links.add(best_link.id)
+            traversed_link_ids.append(best_link.id)
+            accumulated += best_link.length
+            current_node = next_node
+            visited_nodes.add(current_node)
+            previous_direction = best_direction
 
         return TraversalResult(
             start_node_oid=start_node_oid,
@@ -375,7 +420,7 @@ class NetJvgResolver:
             visited_link_count=len(visited_links),
             accumulated_length_m=accumulated,
             traversed_link_ids=traversed_link_ids,
-            notes="Traversal v1 använder enkel grafgång över länkar och är första steg mot sammanhängande nätverkskorridorer.",
+            notes="Traversal v2 använder enkel riktningskontinuitet för att följa huvudkorridoren och undvika grenar.",
         )
 
     def recommend_next_steps(self) -> dict[str, Any]:
