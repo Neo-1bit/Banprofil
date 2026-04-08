@@ -7,6 +7,7 @@ from .master_network_analyzer import (
     MasterNetworkAnalyzerError,
     NetworkTableSummary,
 )
+from .net_jvg_kml import NetJvgKmlError, export_traversal_kml
 from .net_jvg_resolver import (
     NetJvgLink,
     NetJvgLinkSequence,
@@ -26,6 +27,7 @@ __all__ = [
     "load_config",
     "MasterNetworkAnalyzer",
     "MasterNetworkAnalyzerError",
+    "NetJvgKmlError",
     "NetJvgLink",
     "NetJvgLinkSequence",
     "NetJvgNetworkSummary",
@@ -37,5 +39,6 @@ __all__ = [
     "SwerefPoint",
     "TraversalResult",
     "TrafikverketGeoPackage",
+    "export_traversal_kml",
     "wgs84_to_sweref99tm",
 ]

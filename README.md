@@ -58,6 +58,7 @@ Kör separata delar:
 python run_master_analysis.py
 python run_traversal_demo.py
 python run_feature_projection.py
+python run_traversal_kml.py
 ```
 
 Det här gör det lättare att verifiera varje steg separat.
