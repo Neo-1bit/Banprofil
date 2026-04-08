@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +8,7 @@ from typing import Any
 
 import requests
 
+from .config_loader import load_config
 from .coordinate_transform import wgs84_to_sweref99tm
 
 logger = logging.getLogger(__name__)
@@ -42,8 +42,8 @@ class LantmaterietClient:
         self._access_token: str | None = None
 
     @classmethod
-    def from_config_file(cls, path: str | Path) -> "LantmaterietClient":
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    def from_config_file(cls, path: str | Path = "config.json") -> "LantmaterietClient":
+        data = load_config(path)
         allowed_keys = {field for field in LantmaterietConfig.__dataclass_fields__}
         filtered = {key: value for key, value in data.items() if key in allowed_keys}
         config = LantmaterietConfig(**filtered)

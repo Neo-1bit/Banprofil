@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .config_loader import load_config
+
 
 class TrafikverketGeoPackageError(Exception):
     """Base exception for Trafikverket GeoPackage access."""
@@ -37,10 +39,8 @@ class TrafikverketGeoPackage:
             raise TrafikverketGeoPackageError(f"GeoPackage not found: {self.gpkg_path}")
 
     @classmethod
-    def from_config_file(cls, config_path: str | Path) -> "TrafikverketGeoPackage":
-        import json
-
-        config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    def from_config_file(cls, config_path: str | Path = "config.json") -> "TrafikverketGeoPackage":
+        config = load_config(config_path)
         gpkg_path = config.get("trafikverket_gpkg_path")
         if gpkg_path:
             return cls(gpkg_path)
