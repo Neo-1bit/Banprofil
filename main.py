@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
+from banprofil.profile_chain import ProfileChainError, ProfileChainIndex
 from banprofil.trafikverket_gpkg import TrafikverketGeoPackage, TrafikverketGeoPackageError
 
 
@@ -39,12 +40,18 @@ def demo_trafikverket() -> None:
     print("\nExempel från raklinje:")
     print(json.dumps(sample_rows, indent=2, ensure_ascii=False, default=str))
 
+    profile_index = ProfileChainIndex(gpkg)
+    forward_view = profile_index.build_forward_view(start_km="1180+200", end_km="1180+320")
+    compact_view = {key: value[:2] for key, value in forward_view.items() if value}
+    print("\nProfilkedja framåt:")
+    print(json.dumps(compact_view, indent=2, ensure_ascii=False, default=str))
+
 
 def main() -> None:
     try:
         demo_lantmateriet()
         demo_trafikverket()
-    except (LantmaterietError, TrafikverketGeoPackageError) as exc:
+    except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc
 
