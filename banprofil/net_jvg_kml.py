@@ -7,6 +7,10 @@ from xml.sax.saxutils import escape
 from .net_jvg_resolver import NetJvgResolver, TraversalResult
 
 
+class NetJvgKmlError(Exception):
+    """Basundantag för Net_JVG KML-export."""
+
+
 def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) -> tuple[float, float, float]:
     """
     Omvandlar SWEREF 99 TM till WGS84.
@@ -79,10 +83,6 @@ def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) 
     return math.degrees(lon_radian), math.degrees(lat_radian), altitude
 
 
-class NetJvgKmlError(Exception):
-    """Basundantag för Net_JVG KML-export."""
-
-
 def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     """
     Dekodar vertices ur GeoPackage-linjegeometri.
@@ -97,16 +97,11 @@ def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     list[tuple[float, float]]
         Vertexlista i SWEREF 99 TM.
     """
-    if not isinstance(geom, bytes) or len(geom) < 80:
+    if not isinstance(geom, bytes) or len(geom) < 40:
         return []
-    # Fallback: use envelope corners as coarse debug geometry when exact WKB parsing is not yet implemented.
+    # Temporär men bättre debug-geometri: använd länkens bbox som diagonal linje.
     minx, maxx, miny, maxy = struct.unpack('<dddd', geom[8:40])
-    return [
-        (minx, miny),
-        (maxx, miny),
-        (maxx, maxy),
-        (minx, maxy),
-    ]
+    return [(minx, miny), (maxx, maxy)]
 
 
 def export_traversal_kml(
@@ -141,7 +136,7 @@ def export_traversal_kml(
     """
     link_ids = set(traversal.traversed_link_ids)
     rows = resolver.gpkg.fetch_rows("Net_JVG_Link", limit=50000, columns=["id", "geom"])
-    coordinates_parts: list[str] = []
+    placemarks = []
     for row in rows:
         if int(row["id"]) not in link_ids:
             continue
@@ -152,26 +147,22 @@ def export_traversal_kml(
         for x, y in vertices:
             lon, lat, alt = sweref99tm_to_wgs84(x, y, 0.0)
             coords.append(f"{lon},{lat},{alt}")
-        coordinates_parts.append(" ".join(coords))
-
-    if not coordinates_parts:
-        raise NetJvgKmlError("No Net_JVG link geometries found for traversal")
-
-    placemarks = []
-    for idx, coords in enumerate(coordinates_parts, start=1):
         placemarks.append(
             f"""
     <Placemark>
-      <name>{escape(name)} del {idx}</name>
+      <name>{escape(name)} link {row['id']}</name>
       <Style>
         <LineStyle><color>ff00a5ff</color><width>3</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
-        <coordinates>{coords}</coordinates>
+        <coordinates>{' '.join(coords)}</coordinates>
       </LineString>
     </Placemark>"""
         )
+
+    if not placemarks:
+        raise NetJvgKmlError("No Net_JVG link geometries found for traversal")
 
     content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
