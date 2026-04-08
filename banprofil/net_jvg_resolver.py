@@ -134,6 +134,8 @@ class TraversalResult:
         Länk-id:n i traverserad ordning.
     traversed_node_oids : list[str]
         Nod-OID:n i den ordning traverseringen följde dem.
+    total_cost : float | None
+        Total routingkostnad när constrained routing används.
     notes : str
         Kommentar om traversalens karaktär.
     """
@@ -145,7 +147,8 @@ class TraversalResult:
     accumulated_length_m: float
     traversed_link_ids: list[int]
     traversed_node_oids: list[str]
-    notes: str
+    total_cost: float | None = None
+    notes: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -338,6 +341,36 @@ class NetJvgResolver:
             for row in rows
         ]
 
+    def _decode_link_vertices(self, geom: bytes | None) -> list[tuple[float, float]]:
+        """
+        Dekodar vertexlista ur Net_JVG-länkens geometri.
+
+        Parameters
+        ----------
+        geom : bytes | None
+            GeoPackage-geometri.
+
+        Returns
+        -------
+        list[tuple[float, float]]
+            Vertexlista i SWEREF 99 TM.
+        """
+        if not isinstance(geom, bytes) or len(geom) < 65:
+            return []
+        point_count = struct.unpack('<I', geom[57:61])[0] - 3000
+        if point_count <= 0:
+            return []
+        offset = 65
+        points: list[tuple[float, float]] = []
+        for _ in range(point_count):
+            if offset + 32 > len(geom):
+                break
+            x = struct.unpack('<d', geom[offset:offset + 8])[0]
+            y = struct.unpack('<d', geom[offset + 8:offset + 16])[0]
+            points.append((x, y))
+            offset += 32
+        return points
+
     def _link_direction(self, link: NetJvgLink, from_node_oid: str) -> tuple[float, float]:
         """
         Beräknar ungefärlig riktning för en länk från en viss nod.
@@ -354,15 +387,17 @@ class NetJvgResolver:
         tuple[float, float]
             Normaliserad riktningsvektor.
         """
-        if not link.geom or len(link.geom) < 40:
+        vertices = self._decode_link_vertices(link.geom)
+        if len(vertices) < 2:
             return (0.0, 0.0)
-        minx, maxx, miny, maxy = struct.unpack('<dddd', link.geom[8:40])
         if from_node_oid == link.start_node_oid:
-            dx = maxx - minx
-            dy = maxy - miny
+            start_point = vertices[0]
+            end_point = vertices[-1]
         else:
-            dx = minx - maxx
-            dy = miny - maxy
+            start_point = vertices[-1]
+            end_point = vertices[0]
+        dx = end_point[0] - start_point[0]
+        dy = end_point[1] - start_point[1]
         length = math.hypot(dx, dy)
         if length == 0:
             return (0.0, 0.0)
@@ -491,6 +526,7 @@ class NetJvgResolver:
             accumulated_length_m=accumulated,
             traversed_link_ids=traversed_link_ids,
             traversed_node_oids=traversed_node_oids,
+            total_cost=None,
             notes="Traversal v2 använder enkel riktningskontinuitet för att följa huvudkorridoren och undvika grenar.",
         )
 
@@ -555,6 +591,60 @@ class NetJvgResolver:
         NetJvgResolverError
             Om någon nod saknas eller om ingen rutt hittas.
         """
+        return self.route_between_nodes_constrained(
+            start_node_oid=start_node_oid,
+            end_node_oid=end_node_oid,
+            limit_links=limit_links,
+            sequence_change_penalty=0.0,
+            direction_break_penalty=0.0,
+            corridor_width_m=1_000_000.0,
+            off_corridor_penalty_factor=0.0,
+        )
+
+    def route_between_nodes_constrained(
+        self,
+        start_node_oid: str,
+        end_node_oid: str,
+        limit_links: int | None = None,
+        sequence_change_penalty: float = 2500.0,
+        direction_break_penalty: float = 1200.0,
+        corridor_width_m: float = 3000.0,
+        off_corridor_penalty_factor: float = 4.0,
+    ) -> TraversalResult:
+        """
+        Beräknar constrained routing v2 i Net_JVG mellan två noder.
+
+        V2 använder längd som bas men straffar sekvensbyten, skarpa riktningsbrott
+        och länkar som driver långt från den raka referenskorridoren mellan start
+        och slut.
+
+        Parameters
+        ----------
+        start_node_oid : str
+            Startnodens OID.
+        end_node_oid : str
+            Slutnodens OID.
+        limit_links : int | None, optional
+            Max antal länkar att läsa. `None` läser alla.
+        sequence_change_penalty : float, optional
+            Straff i meterliknande kostnad för byte av `LINKSEQUENCE_OID`.
+        direction_break_penalty : float, optional
+            Maxstraff för kraftigt riktningsbrott.
+        corridor_width_m : float, optional
+            Tillåtet avstånd från referenskorridoren innan avvikelsestraff börjar.
+        off_corridor_penalty_factor : float, optional
+            Multiplikativt straff per meter utanför korridoren.
+
+        Returns
+        -------
+        TraversalResult
+            Traversalresultat för constrained route.
+
+        Raises
+        ------
+        NetJvgResolverError
+            Om någon nod saknas eller om ingen rutt hittas.
+        """
         links = self.load_links(limit=limit_links, include_geom=True)
         adjacency: dict[str, list[tuple[str, NetJvgLink]]] = defaultdict(list)
         for link in links:
@@ -566,53 +656,114 @@ class NetJvgResolver:
         if end_node_oid not in adjacency:
             raise NetJvgResolverError(f"End node not found in graph: {end_node_oid}")
 
-        distances: dict[str, float] = {start_node_oid: 0.0}
-        previous_nodes: dict[str, str] = {}
-        previous_links: dict[str, int] = {}
-        queue: list[tuple[float, str]] = [(0.0, start_node_oid)]
-        visited: set[str] = set()
+        nodes = {node.oid: node for node in self.load_nodes(limit=None, include_geom=True)}
+        start_node = nodes.get(start_node_oid)
+        end_node = nodes.get(end_node_oid)
+        if start_node is None or end_node is None:
+            raise NetJvgResolverError("Could not load node geometry for constrained routing")
+        if start_node.easting is None or start_node.northing is None or end_node.easting is None or end_node.northing is None:
+            raise NetJvgResolverError("Missing SWEREF geometry for start or end node")
+
+        corridor_start = (start_node.easting, start_node.northing)
+        corridor_end = (end_node.easting, end_node.northing)
+        corridor_dx = corridor_end[0] - corridor_start[0]
+        corridor_dy = corridor_end[1] - corridor_start[1]
+        corridor_length = math.hypot(corridor_dx, corridor_dy)
+
+        def point_to_corridor_distance(point: tuple[float, float]) -> float:
+            if corridor_length == 0.0:
+                return math.hypot(point[0] - corridor_start[0], point[1] - corridor_start[1])
+            projection = (
+                (point[0] - corridor_start[0]) * corridor_dx + (point[1] - corridor_start[1]) * corridor_dy
+            ) / (corridor_length ** 2)
+            projection = max(0.0, min(1.0, projection))
+            nearest_x = corridor_start[0] + projection * corridor_dx
+            nearest_y = corridor_start[1] + projection * corridor_dy
+            return math.hypot(point[0] - nearest_x, point[1] - nearest_y)
+
+        def link_corridor_penalty(link: NetJvgLink) -> float:
+            vertices = self._decode_link_vertices(link.geom)
+            if not vertices:
+                return 0.0
+            max_distance = max(point_to_corridor_distance(vertex) for vertex in vertices)
+            excess_distance = max(0.0, max_distance - corridor_width_m)
+            return excess_distance * off_corridor_penalty_factor
+
+        queue: list[tuple[float, str, str | None, float, float, float]] = [
+            (0.0, start_node_oid, None, 0.0, 0.0, 0.0)
+        ]
+        best_costs: dict[tuple[str, str | None], float] = {(start_node_oid, None): 0.0}
+        previous_state: dict[tuple[str, str | None], tuple[str, str | None, int]] = {}
+        final_state: tuple[str, str | None] | None = None
 
         while queue:
-            distance_so_far, current_node_oid = heapq.heappop(queue)
-            if current_node_oid in visited:
+            total_cost, current_node_oid, previous_sequence_oid, accumulated_length, previous_dx, previous_dy = heapq.heappop(queue)
+            state_key = (current_node_oid, previous_sequence_oid)
+            if total_cost > best_costs.get(state_key, float('inf')):
                 continue
-            visited.add(current_node_oid)
             if current_node_oid == end_node_oid:
+                final_state = state_key
+                final_length = accumulated_length
                 break
-            for neighbor_oid, link in adjacency[current_node_oid]:
-                new_distance = distance_so_far + link.length
-                if new_distance >= distances.get(neighbor_oid, float('inf')):
-                    continue
-                distances[neighbor_oid] = new_distance
-                previous_nodes[neighbor_oid] = current_node_oid
-                previous_links[neighbor_oid] = link.id
-                heapq.heappush(queue, (new_distance, neighbor_oid))
 
-        if end_node_oid not in distances:
+            for neighbor_oid, link in adjacency[current_node_oid]:
+                direction_dx, direction_dy = self._link_direction(link, current_node_oid)
+                edge_cost = link.length
+                if previous_sequence_oid is not None and link.linksequence_oid != previous_sequence_oid:
+                    edge_cost += sequence_change_penalty
+                if previous_dx != 0.0 or previous_dy != 0.0:
+                    continuity = previous_dx * direction_dx + previous_dy * direction_dy
+                    edge_cost += direction_break_penalty * (1.0 - max(-1.0, min(1.0, continuity)))
+                edge_cost += link_corridor_penalty(link)
+                next_cost = total_cost + edge_cost
+                next_state_key = (neighbor_oid, link.linksequence_oid)
+                if next_cost >= best_costs.get(next_state_key, float('inf')):
+                    continue
+                best_costs[next_state_key] = next_cost
+                previous_state[next_state_key] = (current_node_oid, previous_sequence_oid, link.id)
+                heapq.heappush(
+                    queue,
+                    (
+                        next_cost,
+                        neighbor_oid,
+                        link.linksequence_oid,
+                        accumulated_length + link.length,
+                        direction_dx,
+                        direction_dy,
+                    ),
+                )
+        else:
             raise NetJvgResolverError(
-                f"No route found between Net_JVG nodes {start_node_oid} and {end_node_oid}"
+                f"No constrained route found between Net_JVG nodes {start_node_oid} and {end_node_oid}"
+            )
+
+        if final_state is None:
+            raise NetJvgResolverError(
+                f"No constrained route found between Net_JVG nodes {start_node_oid} and {end_node_oid}"
             )
 
         traversed_node_oids: list[str] = [end_node_oid]
         traversed_link_ids: list[int] = []
-        current_node_oid = end_node_oid
-        while current_node_oid != start_node_oid:
-            traversed_link_ids.append(previous_links[current_node_oid])
-            current_node_oid = previous_nodes[current_node_oid]
-            traversed_node_oids.append(current_node_oid)
+        current_state = final_state
+        while current_state[0] != start_node_oid:
+            prev_node_oid, prev_sequence_oid, link_id = previous_state[current_state]
+            traversed_link_ids.append(link_id)
+            traversed_node_oids.append(prev_node_oid)
+            current_state = (prev_node_oid, prev_sequence_oid)
         traversed_link_ids.reverse()
         traversed_node_oids.reverse()
 
         return TraversalResult(
             start_node_oid=start_node_oid,
-            target_length_m=distances[end_node_oid],
+            target_length_m=final_length,
             visited_node_count=len(traversed_node_oids),
             visited_link_count=len(traversed_link_ids),
-            accumulated_length_m=distances[end_node_oid],
+            accumulated_length_m=final_length,
             traversed_link_ids=traversed_link_ids,
             traversed_node_oids=traversed_node_oids,
+            total_cost=best_costs[final_state],
             notes=(
-                "Point-to-point route i Net_JVG beräknad med kortaste väg mellan matchade referensnoder."
+                "Constrained routing v2 använder längd plus straff för sekvensbyte, riktningsbrott och korridoravvikelse."
             ),
         )
 

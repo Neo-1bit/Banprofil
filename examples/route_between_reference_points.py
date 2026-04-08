@@ -31,9 +31,13 @@ def main() -> None:
         northing=point2_northing,
     )
 
-    traversal = resolver.route_between_nodes(
+    traversal = resolver.route_between_nodes_constrained(
         start_node_oid=start_match.node_oid,
         end_node_oid=end_match.node_oid,
+        sequence_change_penalty=2500.0,
+        direction_break_penalty=1200.0,
+        corridor_width_m=3000.0,
+        off_corridor_penalty_factor=4.0,
     )
     output = export_traversal_kml(
         resolver=resolver,
@@ -58,6 +62,7 @@ def main() -> None:
         "Rutt",
         f"{traversal.visited_link_count} länkar",
         f"{traversal.accumulated_length_m:.2f} m",
+        f"kostnad {traversal.total_cost:.2f}" if traversal.total_cost is not None else "",
     )
     print(output)
 

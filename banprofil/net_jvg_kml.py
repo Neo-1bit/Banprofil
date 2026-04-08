@@ -340,7 +340,7 @@ def export_traversal_kml(
       <name>{escape(name)} sekvens {index}</name>
       <description>{escape(f'Länkar: {len(link_geometries)}. Vertex i sekvens: {len(sequence)}.')}</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -355,7 +355,7 @@ def export_traversal_kml(
     <Placemark>
       <name>{escape(name)} link {link_geometry.link_id}</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>

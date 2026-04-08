@@ -6,7 +6,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 1</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -17,7 +17,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 2</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -28,7 +28,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 3</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -39,7 +39,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 4</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -50,7 +50,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 5</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -61,7 +61,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 6</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -72,7 +72,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 7</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -83,7 +83,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 8</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -94,7 +94,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 9</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -105,7 +105,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 10</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -116,7 +116,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 11</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -127,7 +127,7 @@
       <name>Net_JVG Route Between Reference Points sekvens 12</name>
       <description>Länkar: 12. Vertex i sekvens: 2.</description>
       <Style>
-        <LineStyle><color>ff00a5ff</color><width>4</width></LineStyle>
+        <LineStyle><color>ff0000ff</color><width>5</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -137,7 +137,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 24406</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -147,7 +147,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25534</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -157,7 +157,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25532</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -167,7 +167,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25518</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -177,7 +177,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 24398</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -187,7 +187,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25533</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -197,7 +197,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25516</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -207,7 +207,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25503</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -217,7 +217,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25502</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -227,7 +227,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25504</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -237,7 +237,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 25501</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
@@ -247,7 +247,7 @@
     <Placemark>
       <name>Net_JVG Route Between Reference Points link 24359</name>
       <Style>
-        <LineStyle><color>7faaaaaa</color><width>1</width></LineStyle>
+        <LineStyle><color>b3000000</color><width>2</width></LineStyle>
       </Style>
       <LineString>
         <tessellate>1</tessellate>
