@@ -5,6 +5,7 @@ import logging
 from dataclasses import asdict
 from pathlib import Path
 
+from banprofil.chain_analysis import ChainAnalyzer
 from banprofil.height_profile import HeightProfileBuilder
 from banprofil.kml_export import export_height_profile_kml
 from banprofil.lantmateriet_client import LantmaterietClient, LantmaterietError
@@ -96,6 +97,22 @@ def demo_kml_export() -> None:
     print(f"\nKML exporterad till: {output}")
 
 
+def demo_chain_analysis() -> None:
+    """
+    Kör en första kedjeanalys för att bedöma vilka nycklar som krävs över km-tal.
+
+    Returns
+    -------
+    None
+        Funktionen skriver analysresultat till standard output.
+    """
+    analyzer = ChainAnalyzer.from_config_file()
+    print("\nKedjekandidater:")
+    print(json.dumps([asdict(candidate) for candidate in analyzer.summarize_chain_key_hypothesis()], indent=2, ensure_ascii=False))
+    print("\nTvetydiga intervall:")
+    print(json.dumps([asdict(interval) for interval in analyzer.find_ambiguous_intervals(limit=5)], indent=2, ensure_ascii=False, default=str))
+
+
 def main() -> None:
     """
     Kör alla demoexempel för projektet.
@@ -115,6 +132,7 @@ def main() -> None:
         demo_trafikverket()
         demo_height_profile()
         demo_kml_export()
+        demo_chain_analysis()
     except (LantmaterietError, TrafikverketGeoPackageError, ProfileChainError) as exc:
         logger.error("Kunde inte köra demo: %s", exc)
         raise SystemExit(1) from exc

@@ -1,3 +1,4 @@
+from .chain_analysis import AmbiguousInterval, ChainAnalyzer, ChainCandidate
 from .coordinate_transform import SwerefPoint, wgs84_to_sweref99tm
 from .height_profile import HeightProfileBuilder, HeightSample, HeightSegment
 from .kml_export import export_height_profile_kml
@@ -6,6 +7,9 @@ from .profile_chain import KmValue, ProfileChainIndex, format_km_value, parse_km
 from .trafikverket_gpkg import LayerInfo, TrafikverketGeoPackage
 
 __all__ = [
+    "AmbiguousInterval",
+    "ChainAnalyzer",
+    "ChainCandidate",
     "HeightProfileBuilder",
     "HeightSample",
     "HeightSegment",
