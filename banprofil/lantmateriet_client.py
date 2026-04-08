@@ -66,6 +66,14 @@ class LantmaterietClient:
     """
 
     def __init__(self, config: LantmaterietConfig) -> None:
+        """
+        Initierar klienten med given konfiguration.
+
+        Parameters
+        ----------
+        config : LantmaterietConfig
+            Konfiguration för API-anrop.
+        """
         self.config = config
         self._access_token: str | None = None
 

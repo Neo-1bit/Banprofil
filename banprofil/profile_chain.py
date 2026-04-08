@@ -140,6 +140,14 @@ class ProfileChainIndex:
     }
 
     def __init__(self, gpkg: TrafikverketGeoPackage) -> None:
+        """
+        Initierar profilindexet.
+
+        Parameters
+        ----------
+        gpkg : TrafikverketGeoPackage
+            GeoPackage-läsare för Trafikverkets data.
+        """
         self.gpkg = gpkg
 
     def fetch_profile_range(

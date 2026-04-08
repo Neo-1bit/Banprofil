@@ -125,6 +125,16 @@ class HeightProfileBuilder:
         gpkg: TrafikverketGeoPackage,
         lantmateriet_client: LantmaterietClient | None = None,
     ) -> None:
+        """
+        Initierar höjdprofilbyggaren.
+
+        Parameters
+        ----------
+        gpkg : TrafikverketGeoPackage
+            GeoPackage-läsare med Trafikverkets data.
+        lantmateriet_client : LantmaterietClient | None, optional
+            Klient för fallback mot Lantmäteriet.
+        """
         self.gpkg = gpkg
         self.profile_index = ProfileChainIndex(gpkg)
         self.lantmateriet_client = lantmateriet_client

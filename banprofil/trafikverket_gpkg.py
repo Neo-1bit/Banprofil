@@ -59,6 +59,19 @@ class TrafikverketGeoPackage:
     }
 
     def __init__(self, gpkg_path: str | Path) -> None:
+        """
+        Initierar GeoPackage-läsaren.
+
+        Parameters
+        ----------
+        gpkg_path : str | Path
+            Sökväg till lokal `.gpkg`-fil.
+
+        Raises
+        ------
+        TrafikverketGeoPackageError
+            Om filen inte finns.
+        """
         self.gpkg_path = Path(gpkg_path)
         if not self.gpkg_path.exists():
             raise TrafikverketGeoPackageError(f"GeoPackage not found: {self.gpkg_path}")
