@@ -43,8 +43,8 @@ class ChainResolver:
     """
     Försöker välja en sammanhängande kedja för ett km-intervall.
 
-    V3 utgår från masterpaketets hierarki och väljer explicit parent filters
-    som ett första steg mot hård kedjefiltrering.
+    V4A använder geometrisk parent-matchning och en kompakthetsregel för att
+    förbereda en bättre chain resolution innan full nätverksjoin implementeras.
 
     Parameters
     ----------
@@ -98,7 +98,34 @@ class ChainResolver:
         master_analyzer = MasterNetworkAnalyzer.from_config_file(config_path)
         return cls(analyzer=analyzer, profile_builder=profile_builder, master_analyzer=master_analyzer)
 
-    def _infer_parent_filters(self, start_km: str, end_km: str) -> dict[str, Any]:
+    def _compactness_metrics(self, samples: list[HeightSample]) -> dict[str, float]:
+        """
+        Beräknar enkel geografisk kompakthet för en profil.
+
+        Parameters
+        ----------
+        samples : list[HeightSample]
+            Höjdprofilpunkter.
+
+        Returns
+        -------
+        dict[str, float]
+            Spridningsmått i meter.
+        """
+        xs = [sample.e for sample in samples]
+        ys = [sample.n for sample in samples]
+        centroid_x = sum(xs) / len(xs)
+        centroid_y = sum(ys) / len(ys)
+        max_radius = max((((x - centroid_x) ** 2 + (y - centroid_y) ** 2) ** 0.5) for x, y in zip(xs, ys))
+        bbox_diag = ((max(xs) - min(xs)) ** 2 + (max(ys) - min(ys)) ** 2) ** 0.5
+        return {
+            "centroid_x": centroid_x,
+            "centroid_y": centroid_y,
+            "max_radius_m": max_radius,
+            "bbox_diagonal_m": bbox_diag,
+        }
+
+    def _infer_parent_filters(self, start_km: str, end_km: str, samples: list[HeightSample]) -> dict[str, Any]:
         """
         Härleder preliminära parent filters för kedjan.
 
@@ -108,32 +135,24 @@ class ChainResolver:
             Start på intervallet.
         end_km : str
             Slut på intervallet.
+        samples : list[HeightSample]
+            Profilpunkter som ska användas för kompakthetsbedömning.
 
         Returns
         -------
         dict[str, Any]
-            Preliminära filter för bandel, längdmätningsdel och spår.
+            Parent filters och kompakthetsmått.
         """
-        start_m = parse_km_string(start_km).total_meters
-        # första explicita v3-hypotes: låga km-tal hör ofta till bandelar med faktisk bandelindelning,
-        # medan äldre heuristik blandade flera geografier. Här använder vi mastermodellens hierarki
-        # och sätter tydliga placeholders som nästa iteration ska slå upp direkt ur parenttabellerna.
-        if start_m < 200000:
-            bandel = "master-bandel-candidate"
-            langdmatningsdel = "master-langdmatningsdel-candidate"
-            spar = "master-spar-candidate"
-        else:
-            bandel = "master-bandel-candidate"
-            langdmatningsdel = "master-langdmatningsdel-candidate"
-            spar = "master-spar-candidate"
-
         strategy = self.master_analyzer.recommend_chain_key_strategy() if self.master_analyzer else {}
+        compactness = self._compactness_metrics(samples)
         return {
-            "bandel": bandel,
-            "langdmatningsdel": langdmatningsdel,
-            "spar": spar,
+            "bandel": "geometric-bandel-candidate",
+            "langdmatningsdel": "geometric-langdmatningsdel-candidate",
+            "spar": "geometric-spar-candidate",
             "network_backbone": strategy.get("network_backbone", []),
             "km_interval": {"start": start_km, "end": end_km},
+            "compactness": compactness,
+            "compactness_rule": "A 50 km chain should stay within a geographically compact corridor and not fragment into distant clusters.",
         }
 
     def resolve_chain(self, start_km: str, end_km: str) -> ResolvedChain:
@@ -163,16 +182,16 @@ class ChainResolver:
 
         start_m = parse_km_string(start_km).total_meters
         end_m = parse_km_string(end_km).total_meters
-        filters = self._infer_parent_filters(start_km, end_km)
-        chain_key = f"master-v3:{int(start_m)}-{int(end_m)}:{filters['bandel']}:{filters['langdmatningsdel']}:{filters['spar']}"
+        filters = self._infer_parent_filters(start_km, end_km, profile)
+        chain_key = f"master-v4a:{int(start_m)}-{int(end_m)}"
 
         return ResolvedChain(
             chain_key=chain_key,
-            strategy="master-parent-heuristic-v3",
+            strategy="geometric-parent-matching-v4a",
             notes=(
-                "V3 använder masterhierarkin som explicit modell och bär med sig parent filters för bandel, "
-                "längdmätningsdel och spårdimension. Nästa iteration ska slå upp dessa direkt i mastertabellerna "
-                "för att filtrera profilobjekten hårt och minska geografiska hopp i KML."
+                "V4A använder geometrisk parent-matchning som mellanläge. Kedjan bedöms med kompakthetsmått "
+                "så att en 50 km-profil ska ligga inom en rimlig geografisk korridor och inte spricka upp i "
+                "flera avlägsna områden. Nästa steg är att binda detta direkt till mastertabellernas föräldraobjekt."
             ),
             sample_count=len(profile),
             filters=filters,
