@@ -4,26 +4,63 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from .trafikverket_gpkg import TrafikverketGeoPackage, TrafikverketGeoPackageError
+from .trafikverket_gpkg import TrafikverketGeoPackage
 
 KM_PATTERN = re.compile(r"^\s*(\d+)\s*\+\s*(\d+(?:[\.,]\d+)?)\s*$")
 
 
 class ProfileChainError(Exception):
-    """Base exception for km-tal/profile-chain helpers."""
+    """Basundantag för km-tal och profilkedja."""
 
 
 @dataclass(frozen=True, slots=True)
 class KmValue:
+    """
+    Representerar ett km-tal uppdelat i kilometer och meter.
+
+    Parameters
+    ----------
+    kilometers : int
+        Heltalsdelen för kilometer.
+    meters : float
+        Meterdelen efter plustecknet.
+    """
+
     kilometers: int
     meters: float
 
     @property
     def total_meters(self) -> float:
+        """
+        Returnerar km-talet som totalt antal meter.
+
+        Returns
+        -------
+        float
+            Totalt antal meter från kilometer och meter-del.
+        """
         return self.kilometers * 1000.0 + self.meters
 
 
 def parse_km_string(value: str) -> KmValue:
+    """
+    Tolkar ett km-tal i formatet `123+456`.
+
+    Parameters
+    ----------
+    value : str
+        Km-tal som text.
+
+    Returns
+    -------
+    KmValue
+        Tolkat km-tal.
+
+    Raises
+    ------
+    ProfileChainError
+        Om texten inte följer förväntat format.
+    """
     match = KM_PATTERN.match(value)
     if not match:
         raise ProfileChainError(f"Invalid km-tal format: {value!r}")
@@ -34,6 +71,19 @@ def parse_km_string(value: str) -> KmValue:
 
 
 def format_km_value(total_meters: float) -> str:
+    """
+    Formaterar totalt antal meter till km-tal.
+
+    Parameters
+    ----------
+    total_meters : float
+        Totalt antal meter.
+
+    Returns
+    -------
+    str
+        Km-tal i formatet `km+meter`.
+    """
     kilometers = int(total_meters // 1000)
     meters = total_meters - kilometers * 1000
     if meters.is_integer():
@@ -44,6 +94,26 @@ def format_km_value(total_meters: float) -> str:
 
 
 def km_range_to_meters(start_km: str, end_km: str) -> tuple[float, float]:
+    """
+    Omvandlar ett km-intervall till meter.
+
+    Parameters
+    ----------
+    start_km : str
+        Start för intervallet som km-tal.
+    end_km : str
+        Slut för intervallet som km-tal.
+
+    Returns
+    -------
+    tuple[float, float]
+        Start och slut i meter.
+
+    Raises
+    ------
+    ProfileChainError
+        Om slutvärdet är mindre än startvärdet.
+    """
     start = parse_km_string(start_km).total_meters
     end = parse_km_string(end_km).total_meters
     if end < start:
@@ -52,6 +122,15 @@ def km_range_to_meters(start_km: str, end_km: str) -> tuple[float, float]:
 
 
 class ProfileChainIndex:
+    """
+    Index för att hämta objekt längs ett km-intervall.
+
+    Parameters
+    ----------
+    gpkg : TrafikverketGeoPackage
+        GeoPackage-läsare för Trafikverkets data.
+    """
+
     DEFAULT_PROFILE_LAYERS = {
         "raklinje": "BIS_DK_O_4012_Raklinje",
         "cirkularkurva": "BIS_DK_O_4010_Cirkularkurva",
@@ -70,6 +149,30 @@ class ProfileChainIndex:
         end_km: str,
         limit: int = 500,
     ) -> list[dict[str, Any]]:
+        """
+        Hämtar objekt i ett profilintervall för ett visst lager.
+
+        Parameters
+        ----------
+        layer_key : str
+            Nyckel för valt lager, till exempel `raklinje`.
+        start_km : str
+            Start på intervallet.
+        end_km : str
+            Slut på intervallet.
+        limit : int, optional
+            Max antal rader att läsa från tabellen.
+
+        Returns
+        -------
+        list[dict[str, Any]]
+            Objekt som överlappar valt km-intervall.
+
+        Raises
+        ------
+        ProfileChainError
+            Om lagernyckeln är okänd.
+        """
         table_name = self.DEFAULT_PROFILE_LAYERS.get(layer_key)
         if not table_name:
             raise ProfileChainError(
@@ -107,6 +210,21 @@ class ProfileChainIndex:
         start_km: str,
         end_km: str,
     ) -> dict[str, list[dict[str, Any]]]:
+        """
+        Bygger en framåtvyn för flera profilrelaterade lager.
+
+        Parameters
+        ----------
+        start_km : str
+            Start på intervallet.
+        end_km : str
+            Slut på intervallet.
+
+        Returns
+        -------
+        dict[str, list[dict[str, Any]]]
+            Dictionary där varje lager pekar på matchande objekt.
+        """
         view: dict[str, list[dict[str, Any]]] = {}
         for layer_key in self.DEFAULT_PROFILE_LAYERS:
             view[layer_key] = self.fetch_profile_range(layer_key, start_km=start_km, end_km=end_km)

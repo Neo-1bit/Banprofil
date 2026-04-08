@@ -11,6 +11,21 @@ from .height_profile import HeightSample, HeightSegment
 
 @dataclass(frozen=True, slots=True)
 class KmlPlacemark:
+    """
+    Beskriver ett KML-objekt som kan exporteras.
+
+    Parameters
+    ----------
+    name : str
+        Namn som visas i Google Earth.
+    description : str
+        Beskrivning som visas i popup.
+    geometry_xml : str
+        Färdig KML-geometri.
+    style_id : str | None, optional
+        Namn på stil som ska användas.
+    """
+
     name: str
     description: str
     geometry_xml: str
@@ -19,12 +34,42 @@ class KmlPlacemark:
 
 @dataclass(frozen=True, slots=True)
 class Wgs84Point:
+    """
+    Representerar en punkt i WGS84.
+
+    Parameters
+    ----------
+    longitude : float
+        Longitud i decimalgrader.
+    latitude : float
+        Latitud i decimalgrader.
+    altitude : float
+        Höjd i meter.
+    """
+
     longitude: float
     latitude: float
     altitude: float
 
 
 def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) -> Wgs84Point:
+    """
+    Omvandlar SWEREF 99 TM till WGS84 för KML-export.
+
+    Parameters
+    ----------
+    easting : float
+        Easting i SWEREF 99 TM.
+    northing : float
+        Northing i SWEREF 99 TM.
+    altitude : float, optional
+        Höjd i meter.
+
+    Returns
+    -------
+    Wgs84Point
+        Punkt i WGS84.
+    """
     axis = 6378137.0
     flattening = 1.0 / 298.257222101
     central_meridian = math.radians(15.0)
@@ -82,6 +127,19 @@ def sweref99tm_to_wgs84(easting: float, northing: float, altitude: float = 0.0) 
 
 
 def _line_string_geometry(coordinates: str) -> str:
+    """
+    Bygger LineString-geometri för KML.
+
+    Parameters
+    ----------
+    coordinates : str
+        Koordinatsträng i KML-format.
+
+    Returns
+    -------
+    str
+        XML-fragment för LineString.
+    """
     return f"""
       <LineString>
         <tessellate>1</tessellate>
@@ -91,6 +149,23 @@ def _line_string_geometry(coordinates: str) -> str:
 
 
 def _point_geometry(longitude: float, latitude: float, altitude: float) -> str:
+    """
+    Bygger Point-geometri för KML.
+
+    Parameters
+    ----------
+    longitude : float
+        Longitud i decimalgrader.
+    latitude : float
+        Latitud i decimalgrader.
+    altitude : float
+        Höjd i meter.
+
+    Returns
+    -------
+    str
+        XML-fragment för Point.
+    """
     return f"""
       <Point>
         <altitudeMode>absolute</altitudeMode>
@@ -99,6 +174,14 @@ def _point_geometry(longitude: float, latitude: float, altitude: float) -> str:
 
 
 def _styles_xml() -> str:
+    """
+    Returnerar standardstilar för KML-export.
+
+    Returns
+    -------
+    str
+        XML-fragment med stildefinitioner.
+    """
     return """
     <Style id="profileLine">
       <LineStyle><color>ff00a5ff</color><width>3</width></LineStyle>
@@ -122,6 +205,21 @@ def _styles_xml() -> str:
 
 
 def build_kml_document(name: str, placemarks: Iterable[KmlPlacemark]) -> str:
+    """
+    Bygger ett komplett KML-dokument.
+
+    Parameters
+    ----------
+    name : str
+        Namn på dokumentet.
+    placemarks : Iterable[KmlPlacemark]
+        Placemark-objekt som ska skrivas ut.
+
+    Returns
+    -------
+    str
+        Färdigt KML-dokument som text.
+    """
     body = []
     for placemark in placemarks:
         style_ref = f"<styleUrl>#{placemark.style_id}</styleUrl>" if placemark.style_id else ""
@@ -144,6 +242,19 @@ def build_kml_document(name: str, placemarks: Iterable[KmlPlacemark]) -> str:
 
 
 def height_samples_to_linestring(samples: list[HeightSample]) -> str:
+    """
+    Omvandlar höjdpunkter till KML-koordinatsträng.
+
+    Parameters
+    ----------
+    samples : list[HeightSample]
+        Höjdpunkter i SWEREF 99 TM.
+
+    Returns
+    -------
+    str
+        KML-koordinatsträng i WGS84.
+    """
     coords = []
     for sample in samples:
         point = sweref99tm_to_wgs84(sample.e, sample.n, sample.z if sample.z is not None else 0.0)
@@ -152,6 +263,19 @@ def height_samples_to_linestring(samples: list[HeightSample]) -> str:
 
 
 def _segment_style(segment: HeightSegment) -> str:
+    """
+    Väljer stil för segment baserat på lutning.
+
+    Parameters
+    ----------
+    segment : HeightSegment
+        Segment som ska färgsättas.
+
+    Returns
+    -------
+    str
+        Stil-ID för segmentet.
+    """
     if segment.average_grade_promille is None:
         return "segmentLineFlat"
     if segment.average_grade_promille > 1.0:
@@ -167,6 +291,25 @@ def export_height_profile_kml(
     name: str = "Banprofil Proof of Concept",
     segments: list[HeightSegment] | None = None,
 ) -> Path:
+    """
+    Exporterar höjdprofil och segment till KML.
+
+    Parameters
+    ----------
+    samples : list[HeightSample]
+        Höjdpunkter som ska exporteras.
+    output_path : str | Path
+        Sökväg till KML-fil som ska skapas.
+    name : str, optional
+        Namn på KML-dokumentet.
+    segments : list[HeightSegment] | None, optional
+        Segment som också ska exporteras.
+
+    Returns
+    -------
+    Path
+        Sökväg till skapad KML-fil.
+    """
     placemarks: list[KmlPlacemark] = []
 
     placemarks.append(

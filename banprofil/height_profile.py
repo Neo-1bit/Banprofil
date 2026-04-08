@@ -14,11 +14,30 @@ POINT_Z_PATTERN = re.compile(
 
 
 class HeightProfileError(Exception):
-    """Base exception for height profile building."""
+    """Basundantag för höjdprofilbyggaren."""
 
 
 @dataclass(slots=True)
 class HeightSample:
+    """
+    Representerar en höjdpunkt längs spåret.
+
+    Parameters
+    ----------
+    source : str
+        Datakälla, till exempel `trafikverket` eller `lantmateriet`.
+    km : str
+        Km-tal för punkten.
+    e : float
+        Easting i SWEREF 99 TM.
+    n : float
+        Northing i SWEREF 99 TM.
+    z : float | None
+        Höjdvärde för punkten.
+    metadata : dict[str, Any], optional
+        Extra information kopplad till punkten.
+    """
+
     source: str
     km: str
     e: float
@@ -28,11 +47,50 @@ class HeightSample:
 
     @property
     def km_meters(self) -> float:
+        """
+        Returnerar km-talet som antal meter.
+
+        Returns
+        -------
+        float
+            Numeriskt km-tal i meter.
+        """
         return parse_km_string(self.km).total_meters
 
 
 @dataclass(slots=True)
 class HeightSegment:
+    """
+    Representerar ett segment mellan två höjdpunkter.
+
+    Parameters
+    ----------
+    start_km : str
+        Startpunktens km-tal.
+    end_km : str
+        Slutpunktens km-tal.
+    start_e : float
+        Startpunktens easting.
+    start_n : float
+        Startpunktens northing.
+    start_z : float | None
+        Startpunktens höjd.
+    end_e : float
+        Slutpunktens easting.
+    end_n : float
+        Slutpunktens northing.
+    end_z : float | None
+        Slutpunktens höjd.
+    distance_m : float
+        Segmentets längd i meter enligt km-tal.
+    delta_z : float | None
+        Höjdskillnad mellan slut och start.
+    average_grade_promille : float | None
+        Beräknad medellutning i promille.
+    metadata : dict[str, Any], optional
+        Sammanfogad metadata för segmentet.
+    """
+
     start_km: str
     end_km: str
     start_e: float
@@ -48,6 +106,20 @@ class HeightSegment:
 
 
 class HeightProfileBuilder:
+    """
+    Bygger höjdprofiler och segment längs ett km-intervall.
+
+    Trafikverkets Z-värden används som primär källa. Om höjd saknas kan
+    Lantmäteriet användas som fallback.
+
+    Parameters
+    ----------
+    gpkg : TrafikverketGeoPackage
+        GeoPackage-läsare med Trafikverkets data.
+    lantmateriet_client : LantmaterietClient | None, optional
+        Klient för fallback mot Lantmäteriet.
+    """
+
     def __init__(
         self,
         gpkg: TrafikverketGeoPackage,
@@ -59,6 +131,19 @@ class HeightProfileBuilder:
 
     @classmethod
     def from_config_file(cls, config_path: str = "config.json") -> "HeightProfileBuilder":
+        """
+        Skapar höjdprofilbyggaren från konfigurationsfil.
+
+        Parameters
+        ----------
+        config_path : str, optional
+            Sökväg till konfigurationsfil.
+
+        Returns
+        -------
+        HeightProfileBuilder
+            Färdig instans av höjdprofilbyggaren.
+        """
         gpkg = TrafikverketGeoPackage.from_config_file(config_path)
         try:
             lantmateriet_client = LantmaterietClient.from_config_file(config_path)
@@ -67,6 +152,19 @@ class HeightProfileBuilder:
         return cls(gpkg=gpkg, lantmateriet_client=lantmateriet_client)
 
     def _parse_point(self, value: str | None) -> tuple[float, float, float] | None:
+        """
+        Tolkar en 3D-punkt från Trafikverkets textformat.
+
+        Parameters
+        ----------
+        value : str | None
+            Punkt i format som `SRID=3006;POINT(x y z)`.
+
+        Returns
+        -------
+        tuple[float, float, float] | None
+            Easting, northing och höjd, eller `None` om formatet inte går att tolka.
+        """
         if not value:
             return None
         match = POINT_Z_PATTERN.search(value)
@@ -79,6 +177,21 @@ class HeightProfileBuilder:
         )
 
     def _lm_height(self, e: float, n: float) -> float | None:
+        """
+        Hämtar fallback-höjd från Lantmäteriet.
+
+        Parameters
+        ----------
+        e : float
+            Easting i SWEREF 99 TM.
+        n : float
+            Northing i SWEREF 99 TM.
+
+        Returns
+        -------
+        float | None
+            Höjd om den kunde hämtas, annars `None`.
+        """
         if not self.lantmateriet_client:
             return None
         try:
@@ -87,6 +200,21 @@ class HeightProfileBuilder:
             return None
 
     def _merge_metadata(self, existing: dict[str, Any], incoming: dict[str, Any]) -> dict[str, Any]:
+        """
+        Slår ihop metadata från två poster.
+
+        Parameters
+        ----------
+        existing : dict[str, Any]
+            Befintlig metadata.
+        incoming : dict[str, Any]
+            Ny metadata som ska slås ihop.
+
+        Returns
+        -------
+        dict[str, Any]
+            Sammanfogad metadata.
+        """
         merged = dict(existing)
 
         layers = set()
@@ -134,6 +262,21 @@ class HeightProfileBuilder:
         return merged
 
     def build_height_profile(self, start_km: str, end_km: str) -> list[HeightSample]:
+        """
+        Bygger en höjdprofil för ett km-intervall.
+
+        Parameters
+        ----------
+        start_km : str
+            Start på intervallet.
+        end_km : str
+            Slut på intervallet.
+
+        Returns
+        -------
+        list[HeightSample]
+            Sorterad lista med unika höjdpunkter.
+        """
         forward_view = self.profile_index.build_forward_view(start_km=start_km, end_km=end_km)
         samples_by_key: dict[tuple[int, int, int], HeightSample] = {}
 
@@ -188,6 +331,21 @@ class HeightProfileBuilder:
         return samples
 
     def build_height_segments(self, start_km: str, end_km: str) -> list[HeightSegment]:
+        """
+        Bygger segment mellan höjdpunkter i ett intervall.
+
+        Parameters
+        ----------
+        start_km : str
+            Start på intervallet.
+        end_km : str
+            Slut på intervallet.
+
+        Returns
+        -------
+        list[HeightSegment]
+            Segment med längd, höjdskillnad och medellutning.
+        """
         samples = self.build_height_profile(start_km=start_km, end_km=end_km)
         segments: list[HeightSegment] = []
 

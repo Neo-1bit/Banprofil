@@ -17,6 +17,14 @@ logger = logging.getLogger("banprofil")
 
 
 def demo_lantmateriet() -> None:
+    """
+    Kör ett enkelt exempelanrop mot Lantmäteriet.
+
+    Returns
+    -------
+    None
+        Funktionen skriver resultatet till standard output.
+    """
     client = LantmaterietClient.from_config_file()
     result = client.get_height(e=667552, n=6983948, srid=3006)
     print("Lantmäteriet svar:")
@@ -24,6 +32,14 @@ def demo_lantmateriet() -> None:
 
 
 def demo_trafikverket() -> None:
+    """
+    Visar grundläggande exempel med Trafikverkets GeoPackage.
+
+    Returns
+    -------
+    None
+        Funktionen skriver lageröversikt och exempeldata till standard output.
+    """
     gpkg = TrafikverketGeoPackage.from_config_file()
     summary = gpkg.summarize_default_layers()
     print("\nTrafikverket standardlager:")
@@ -41,6 +57,14 @@ def demo_trafikverket() -> None:
 
 
 def demo_height_profile() -> None:
+    """
+    Visar exempel på höjdprofil och höjdsegment.
+
+    Returns
+    -------
+    None
+        Funktionen skriver profiler och segment till standard output.
+    """
     builder = HeightProfileBuilder.from_config_file()
     profile = builder.build_height_profile(start_km="1180+200", end_km="1180+320")
     serializable = [asdict(sample) for sample in profile[:8]]
@@ -53,6 +77,14 @@ def demo_height_profile() -> None:
 
 
 def demo_kml_export() -> None:
+    """
+    Exporterar proof-of-concept-KML för cirka 50 km järnväg.
+
+    Returns
+    -------
+    None
+        Funktionen skriver sökvägen till skapad KML-fil.
+    """
     builder = HeightProfileBuilder.from_config_file()
     profile = builder.build_height_profile(start_km="75+935", end_km="125+935")
     segments = builder.build_height_segments(start_km="75+935", end_km="125+935")
@@ -65,6 +97,19 @@ def demo_kml_export() -> None:
 
 
 def main() -> None:
+    """
+    Kör alla demoexempel för projektet.
+
+    Returns
+    -------
+    None
+        Funktionen avslutar processen med felkod vid undantag.
+
+    Raises
+    ------
+    SystemExit
+        Om någon av demo-funktionerna misslyckas.
+    """
     try:
         demo_lantmateriet()
         demo_trafikverket()

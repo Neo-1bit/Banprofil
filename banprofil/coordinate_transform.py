@@ -6,12 +6,37 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class SwerefPoint:
+    """
+    Representerar en punkt i SWEREF 99 TM.
+
+    Parameters
+    ----------
+    e : float
+        Easting i meter.
+    n : float
+        Northing i meter.
+    """
+
     e: float
     n: float
 
 
 def wgs84_to_sweref99tm(latitude: float, longitude: float) -> SwerefPoint:
-    """Convert WGS84 latitude/longitude (EPSG:4326) to SWEREF 99 TM (EPSG:3006)."""
+    """
+    Omvandlar WGS84-koordinater till SWEREF 99 TM.
+
+    Parameters
+    ----------
+    latitude : float
+        Latitud i WGS84, i decimalgrader.
+    longitude : float
+        Longitud i WGS84, i decimalgrader.
+
+    Returns
+    -------
+    SwerefPoint
+        Punkt i SWEREF 99 TM (EPSG:3006).
+    """
     axis = 6378137.0
     flattening = 1.0 / 298.257222101
     central_meridian = math.radians(15.0)
