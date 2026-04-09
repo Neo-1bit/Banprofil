@@ -1,0 +1,936 @@
+{
+  "route_length_m": 28117.433898004052,
+  "points": [
+    {
+      "distance_m": 0.0,
+      "elevation_m": 65.26,
+      "source": "lutning_start",
+      "description": "Lutning -12.5‰ 736+330->736+340 längd 10.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 65.21,
+      "source": "lutning_end",
+      "description": "Lutning -12.5‰ 736+330->736+340 längd 10.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 65.24,
+      "source": "lutning_start",
+      "description": "Lutning -12.5‰ 736+330->736+340 längd 10.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 65.12,
+      "source": "lutning_end",
+      "description": "Lutning -12.5‰ 736+330->736+340 längd 10.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 64.65,
+      "source": "lutning_start",
+      "description": "Lutning -8.5‰ 736+359->736+367 längd 8.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 64.58,
+      "source": "lutning_end",
+      "description": "Lutning -8.5‰ 736+359->736+367 längd 8.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 64.39,
+      "source": "lutning_end",
+      "description": "Lutning -7.85‰ 736+367->736+387 längd 20.0 m"
+    },
+    {
+      "distance_m": 0.0,
+      "elevation_m": 66.68,
+      "source": "lutning_end",
+      "description": "Lutning -18.3‰ 736+84->736+239 längd 155.0 m"
+    },
+    {
+      "distance_m": 278.6314664572557,
+      "elevation_m": 70.07,
+      "source": "lutning_end",
+      "description": "Lutning -17.2‰ 733+480->736+56 längd 2577.7 m"
+    },
+    {
+      "distance_m": 278.6314664572557,
+      "elevation_m": 69.63,
+      "source": "lutning_start",
+      "description": "Lutning -18.3‰ 736+84->736+239 längd 155.0 m"
+    },
+    {
+      "distance_m": 278.6314664572557,
+      "elevation_m": 70.07,
+      "source": "lutning_end",
+      "description": "Lutning -17.2‰ 733+480->736+56 längd 2577.7 m"
+    },
+    {
+      "distance_m": 2764.2466950804405,
+      "elevation_m": 111.37,
+      "source": "lutning_start",
+      "description": "Lutning -17.2‰ 733+480->736+56 längd 2577.7 m"
+    },
+    {
+      "distance_m": 3118.489256758865,
+      "elevation_m": 116.79,
+      "source": "lutning_end",
+      "description": "Lutning -16.0‰ 732+780->733+120 längd 342.51 m"
+    },
+    {
+      "distance_m": 3490.8298759636696,
+      "elevation_m": 122.21,
+      "source": "lutning_start",
+      "description": "Lutning -16.0‰ 732+780->733+120 längd 342.51 m"
+    },
+    {
+      "distance_m": 4130.861102607868,
+      "elevation_m": 132.28,
+      "source": "lutning_end",
+      "description": "Lutning -16.0‰ 731+0->732+100 längd 1097.49 m"
+    },
+    {
+      "distance_m": 5232.577803384472,
+      "elevation_m": 150.56,
+      "source": "lutning_start",
+      "description": "Lutning -16.0‰ 731+0->732+100 längd 1097.49 m"
+    },
+    {
+      "distance_m": 5232.577803384472,
+      "elevation_m": 150.842,
+      "source": "lutning_end",
+      "description": "Lutning -15.219‰ 730+637->731+0 längd 362.207 m"
+    },
+    {
+      "distance_m": 5588.060655171558,
+      "elevation_m": 156.355,
+      "source": "lutning_start",
+      "description": "Lutning -15.219‰ 730+637->731+0 längd 362.207 m"
+    },
+    {
+      "distance_m": 5613.923545755827,
+      "elevation_m": 156.718,
+      "source": "lutning_end",
+      "description": "Lutning -16.493‰ 730+474->730+614 längd 139.636 m"
+    },
+    {
+      "distance_m": 5753.54751141017,
+      "elevation_m": 159.021,
+      "source": "lutning_start",
+      "description": "Lutning -16.493‰ 730+474->730+614 längd 139.636 m"
+    },
+    {
+      "distance_m": 5967.775139345972,
+      "elevation_m": 160.956,
+      "source": "lutning_end",
+      "description": "Lutning -0.875‰ 730+194->730+260 längd 65.254 m"
+    },
+    {
+      "distance_m": 6033.015875166553,
+      "elevation_m": 161.013,
+      "source": "lutning_start",
+      "description": "Lutning -0.875‰ 730+194->730+260 längd 65.254 m"
+    },
+    {
+      "distance_m": 6067.864568840486,
+      "elevation_m": 161.007,
+      "source": "lutning_end",
+      "description": "Lutning 1.286‰ 730+84->730+162 längd 78.059 m"
+    },
+    {
+      "distance_m": 6143.485255648441,
+      "elevation_m": 160.906,
+      "source": "lutning_start",
+      "description": "Lutning 1.286‰ 730+84->730+162 längd 78.059 m"
+    },
+    {
+      "distance_m": 6341.313219736163,
+      "elevation_m": 162.431,
+      "source": "lutning_end",
+      "description": "Lutning -16.702‰ 729+462->729+890 längd 427.421 m"
+    },
+    {
+      "distance_m": 6768.693479004414,
+      "elevation_m": 169.57,
+      "source": "lutning_start",
+      "description": "Lutning -16.702‰ 729+462->729+890 längd 427.421 m"
+    },
+    {
+      "distance_m": 6808.185127394988,
+      "elevation_m": 170.186,
+      "source": "lutning_end",
+      "description": "Lutning -14.507‰ 729+148->729+423 längd 275.337 m"
+    },
+    {
+      "distance_m": 7088.09153030151,
+      "elevation_m": 174.181,
+      "source": "lutning_start",
+      "description": "Lutning -14.507‰ 729+148->729+423 längd 275.337 m"
+    },
+    {
+      "distance_m": 7113.961350574359,
+      "elevation_m": 174.638,
+      "source": "lutning_end",
+      "description": "Lutning -15.491‰ 729+50->729+117 längd 67.205 m"
+    },
+    {
+      "distance_m": 7181.157500232887,
+      "elevation_m": 175.679,
+      "source": "lutning_start",
+      "description": "Lutning -15.491‰ 729+50->729+117 längd 67.205 m"
+    },
+    {
+      "distance_m": 7300.917234489705,
+      "elevation_m": 176.638,
+      "source": "lutning_end",
+      "description": "Lutning -0.517‰ 728+793->728+927 längd 134.405 m"
+    },
+    {
+      "distance_m": 7435.2980947382475,
+      "elevation_m": 176.707,
+      "source": "lutning_start",
+      "description": "Lutning -0.517‰ 728+793->728+927 längd 134.405 m"
+    },
+    {
+      "distance_m": 7442.993875424434,
+      "elevation_m": 176.707,
+      "source": "lutning_end",
+      "description": "Lutning 0.566‰ 728+542->728+771 längd 229.107 m"
+    },
+    {
+      "distance_m": 7660.716603491057,
+      "elevation_m": 176.07,
+      "source": "lutning_start",
+      "description": "Lutning 6.0‰ 728+559->728+563 längd 4.0 m"
+    },
+    {
+      "distance_m": 7660.716603491057,
+      "elevation_m": 176.08,
+      "source": "lutning_end",
+      "description": "Lutning 6.0‰ 728+559->728+563 längd 4.0 m"
+    },
+    {
+      "distance_m": 7660.716603491057,
+      "elevation_m": 176.07,
+      "source": "lutning_end",
+      "description": "Lutning -1.32‰ 728+509->728+559 längd 50.0 m"
+    },
+    {
+      "distance_m": 7660.716603491057,
+      "elevation_m": 176.577,
+      "source": "lutning_start",
+      "description": "Lutning 0.566‰ 728+542->728+771 längd 229.107 m"
+    },
+    {
+      "distance_m": 7725.831885875456,
+      "elevation_m": 176.02,
+      "source": "lutning_end",
+      "description": "Lutning 0.28‰ 728+459->728+509 längd 50.0 m"
+    },
+    {
+      "distance_m": 7725.831885875456,
+      "elevation_m": 176.557,
+      "source": "lutning_end",
+      "description": "Lutning 1.277‰ 728+341->728+520 längd 179.126 m"
+    },
+    {
+      "distance_m": 7779.1985421319605,
+      "elevation_m": 176.19,
+      "source": "lutning_start",
+      "description": "Lutning -2.29‰ 728+378->728+409 längd 31.0 m"
+    },
+    {
+      "distance_m": 7779.1985421319605,
+      "elevation_m": 176.12,
+      "source": "lutning_end",
+      "description": "Lutning -2.29‰ 728+378->728+409 längd 31.0 m"
+    },
+    {
+      "distance_m": 7975.167927496103,
+      "elevation_m": 176.329,
+      "source": "lutning_start",
+      "description": "Lutning 1.277‰ 728+341->728+520 längd 179.126 m"
+    },
+    {
+      "distance_m": 7975.167927496103,
+      "elevation_m": 176.294,
+      "source": "lutning_end",
+      "description": "Lutning -0.506‰ 728+200->728+252 längd 52.543 m"
+    },
+    {
+      "distance_m": 8161.606878229265,
+      "elevation_m": 176.975,
+      "source": "lutning_end",
+      "description": "Lutning -8.314‰ 728+17->728+51 längd 34.168 m"
+    },
+    {
+      "distance_m": 8200.077646352607,
+      "elevation_m": 177.259,
+      "source": "lutning_start",
+      "description": "Lutning -8.314‰ 728+17->728+51 längd 34.168 m"
+    },
+    {
+      "distance_m": 8358.076218024029,
+      "elevation_m": 179.148,
+      "source": "lutning_end",
+      "description": "Lutning -17.07‰ 727+745->727+867 längd 121.919 m"
+    },
+    {
+      "distance_m": 8481.35138266014,
+      "elevation_m": 181.229,
+      "source": "lutning_start",
+      "description": "Lutning -17.07‰ 727+745->727+867 längd 121.919 m"
+    },
+    {
+      "distance_m": 8503.779729936063,
+      "elevation_m": 181.591,
+      "source": "lutning_end",
+      "description": "Lutning -15.2‰ 727+57->727+723 längd 665.864 m"
+    },
+    {
+      "distance_m": 9151.80212070508,
+      "elevation_m": 191.712,
+      "source": "lutning_end",
+      "description": "Lutning -14.498‰ 726+838->727+57 längd 217.882 m"
+    },
+    {
+      "distance_m": 9351.527171991102,
+      "elevation_m": 194.871,
+      "source": "lutning_start",
+      "description": "Lutning -14.498‰ 726+838->727+57 längd 217.882 m"
+    },
+    {
+      "distance_m": 9440.885999199161,
+      "elevation_m": 195.38,
+      "source": "lutning_end",
+      "description": "Lutning -14.499‰ 725+958->726+805 längd 846.267 m"
+    },
+    {
+      "distance_m": 10265.525274639527,
+      "elevation_m": 207.65,
+      "source": "lutning_start",
+      "description": "Lutning -14.499‰ 725+958->726+805 längd 846.267 m"
+    },
+    {
+      "distance_m": 10684.872139068317,
+      "elevation_m": 213.928,
+      "source": "lutning_start",
+      "description": "Lutning -15.5‰ 725+553->725+958 längd 404.995 m"
+    },
+    {
+      "distance_m": 10963.0844760869,
+      "elevation_m": 215.075,
+      "source": "lutning_end",
+      "description": "Lutning 7.002‰ 725+31->725+283 längd 252.173 m"
+    },
+    {
+      "distance_m": 11189.210790465559,
+      "elevation_m": 213.309,
+      "source": "lutning_start",
+      "description": "Lutning 7.002‰ 725+31->725+283 längd 252.173 m"
+    },
+    {
+      "distance_m": 12103.19328482746,
+      "elevation_m": 213.617,
+      "source": "lutning_end",
+      "description": "Lutning -9.999‰ 723+685->724+205 längd 518.671 m"
+    },
+    {
+      "distance_m": 12543.536613911863,
+      "elevation_m": 218.804,
+      "source": "lutning_start",
+      "description": "Lutning -9.999‰ 723+685->724+205 längd 518.671 m"
+    },
+    {
+      "distance_m": 12543.536613911863,
+      "elevation_m": 219.244,
+      "source": "lutning_end",
+      "description": "Lutning -12.0‰ 722+883->723+645 längd 763.74 m"
+    },
+    {
+      "distance_m": 13321.373372502854,
+      "elevation_m": 228.409,
+      "source": "lutning_start",
+      "description": "Lutning -12.0‰ 722+883->723+645 längd 763.74 m"
+    },
+    {
+      "distance_m": 13471.069460931203,
+      "elevation_m": 229.199,
+      "source": "lutning_end",
+      "description": "Lutning 3.5‰ 722+222->722+697 längd 474.467 m"
+    },
+    {
+      "distance_m": 13852.10878928877,
+      "elevation_m": 227.538,
+      "source": "lutning_start",
+      "description": "Lutning 3.5‰ 722+222->722+697 längd 474.467 m"
+    },
+    {
+      "distance_m": 14241.005600003396,
+      "elevation_m": 227.323,
+      "source": "lutning_end",
+      "description": "Lutning 3.001‰ 721+577->721+928 längd 350.503 m"
+    },
+    {
+      "distance_m": 14643.082715272874,
+      "elevation_m": 226.271,
+      "source": "lutning_start",
+      "description": "Lutning 3.001‰ 721+577->721+928 längd 350.503 m"
+    },
+    {
+      "distance_m": 14753.096725114896,
+      "elevation_m": 226.216,
+      "source": "lutning_end",
+      "description": "Lutning -2.0‰ 721+378->721+467 längd 89.0 m"
+    },
+    {
+      "distance_m": 14842.094283147602,
+      "elevation_m": 226.394,
+      "source": "lutning_start",
+      "description": "Lutning -2.0‰ 721+378->721+467 längd 89.0 m"
+    },
+    {
+      "distance_m": 14873.446680201085,
+      "elevation_m": 226.43,
+      "source": "lutning_end",
+      "description": "Lutning 0.0‰ 721+197->721+342 längd 144.674 m"
+    },
+    {
+      "distance_m": 15022.722056042949,
+      "elevation_m": 226.43,
+      "source": "lutning_start",
+      "description": "Lutning 0.0‰ 721+197->721+342 längd 144.674 m"
+    },
+    {
+      "distance_m": 15190.711853315293,
+      "elevation_m": 225.253,
+      "source": "lutning_end",
+      "description": "Lutning 14.003‰ 720+913->721+29 längd 116.171 m"
+    },
+    {
+      "distance_m": 15303.66399831772,
+      "elevation_m": 223.627,
+      "source": "lutning_start",
+      "description": "Lutning 14.003‰ 720+913->721+29 längd 116.171 m"
+    },
+    {
+      "distance_m": 15546.813594096411,
+      "elevation_m": 223.146,
+      "source": "lutning_end",
+      "description": "Lutning -9.996‰ 720+622->720+673 längd 51.315 m"
+    },
+    {
+      "distance_m": 15598.124529525468,
+      "elevation_m": 223.659,
+      "source": "lutning_start",
+      "description": "Lutning -9.996‰ 720+622->720+673 längd 51.315 m"
+    },
+    {
+      "distance_m": 15729.145902736287,
+      "elevation_m": 224.094,
+      "source": "lutning_end",
+      "description": "Lutning 3.6‰ 719+857->720+486 längd 627.757 m"
+    },
+    {
+      "distance_m": 16361.73994755621,
+      "elevation_m": 221.834,
+      "source": "lutning_start",
+      "description": "Lutning 3.6‰ 719+857->720+486 längd 627.757 m"
+    },
+    {
+      "distance_m": 16559.0452595932,
+      "elevation_m": 222.514,
+      "source": "lutning_end",
+      "description": "Lutning -10.497‰ 719+551->719+660 längd 108.969 m"
+    },
+    {
+      "distance_m": 16668.001117722797,
+      "elevation_m": 223.658,
+      "source": "lutning_start",
+      "description": "Lutning -10.497‰ 719+551->719+660 längd 108.969 m"
+    },
+    {
+      "distance_m": 16913.919461230875,
+      "elevation_m": 223.72,
+      "source": "lutning_end",
+      "description": "Lutning 9.998‰ 719+243->719+305 längd 62.191 m"
+    },
+    {
+      "distance_m": 16969.57142406219,
+      "elevation_m": 223.098,
+      "source": "lutning_start",
+      "description": "Lutning 9.998‰ 719+243->719+305 längd 62.191 m"
+    },
+    {
+      "distance_m": 17005.1501387107,
+      "elevation_m": 222.765,
+      "source": "lutning_end",
+      "description": "Lutning 12.902‰ 718+975->719+214 längd 237.902 m"
+    },
+    {
+      "distance_m": 17243.017866511094,
+      "elevation_m": 219.696,
+      "source": "lutning_start",
+      "description": "Lutning 12.902‰ 718+975->719+214 längd 237.902 m"
+    },
+    {
+      "distance_m": 17301.01727155406,
+      "elevation_m": 219.032,
+      "source": "lutning_end",
+      "description": "Lutning 10.001‰ 718+735->718+917 längd 181.749 m"
+    },
+    {
+      "distance_m": 17482.740943308585,
+      "elevation_m": 217.214,
+      "source": "lutning_start",
+      "description": "Lutning 10.001‰ 718+735->718+917 längd 181.749 m"
+    },
+    {
+      "distance_m": 17632.879479836796,
+      "elevation_m": 216.417,
+      "source": "lutning_end",
+      "description": "Lutning 0.615‰ 718+439->718+585 längd 146.528 m"
+    },
+    {
+      "distance_m": 17779.482223878294,
+      "elevation_m": 216.327,
+      "source": "lutning_start",
+      "description": "Lutning 0.615‰ 718+439->718+585 längd 146.528 m"
+    },
+    {
+      "distance_m": 17802.83846227457,
+      "elevation_m": 216.323,
+      "source": "lutning_end",
+      "description": "Lutning -0.323‰ 718+169->718+415 längd 246.676 m"
+    },
+    {
+      "distance_m": 18049.441740497747,
+      "elevation_m": 216.403,
+      "source": "lutning_start",
+      "description": "Lutning -0.323‰ 718+169->718+415 längd 246.676 m"
+    },
+    {
+      "distance_m": 18069.91987422668,
+      "elevation_m": 216.4,
+      "source": "lutning_end",
+      "description": "Lutning 0.608‰ 717+971->718+148 längd 177.21 m"
+    },
+    {
+      "distance_m": 18247.129504467026,
+      "elevation_m": 216.292,
+      "source": "lutning_start",
+      "description": "Lutning 0.608‰ 717+971->718+148 längd 177.21 m"
+    },
+    {
+      "distance_m": 18276.128804889784,
+      "elevation_m": 216.299,
+      "source": "lutning_end",
+      "description": "Lutning -1.098‰ 717+859->717+942 längd 83.087 m"
+    },
+    {
+      "distance_m": 18410.670188634653,
+      "elevation_m": 216.4,
+      "source": "lutning_end",
+      "description": "Lutning 0.479‰ 717+705->717+827 längd 121.582 m"
+    },
+    {
+      "distance_m": 18410.670188634653,
+      "elevation_m": 216.39,
+      "source": "lutning_start",
+      "description": "Lutning -1.098‰ 717+859->717+942 längd 83.087 m"
+    },
+    {
+      "distance_m": 18512.300916575896,
+      "elevation_m": 216.342,
+      "source": "lutning_start",
+      "description": "Lutning 0.479‰ 717+705->717+827 längd 121.582 m"
+    },
+    {
+      "distance_m": 18697.001148492403,
+      "elevation_m": 215.441,
+      "source": "lutning_end",
+      "description": "Lutning 9.275‰ 717+317->717+521 längd 203.398 m"
+    },
+    {
+      "distance_m": 18900.358291598113,
+      "elevation_m": 213.555,
+      "source": "lutning_start",
+      "description": "Lutning 9.275‰ 717+317->717+521 längd 203.398 m"
+    },
+    {
+      "distance_m": 19006.220972770785,
+      "elevation_m": 212.199,
+      "source": "lutning_end",
+      "description": "Lutning 16.335‰ 717+61->717+211 längd 150.328 m"
+    },
+    {
+      "distance_m": 19156.5369322752,
+      "elevation_m": 209.743,
+      "source": "lutning_start",
+      "description": "Lutning 16.335‰ 717+61->717+211 längd 150.328 m"
+    },
+    {
+      "distance_m": 19185.46611088642,
+      "elevation_m": 209.249,
+      "source": "lutning_end",
+      "description": "Lutning 17.783‰ 717+10->717+32 längd 22.608 m"
+    },
+    {
+      "distance_m": 19203.60634251684,
+      "elevation_m": 208.847,
+      "source": "lutning_start",
+      "description": "Lutning 17.783‰ 717+10->717+32 längd 22.608 m"
+    },
+    {
+      "distance_m": 19234.841986456307,
+      "elevation_m": 208.359,
+      "source": "lutning_end",
+      "description": "Lutning 16.648‰ 716+779->716+984 längd 204.808 m"
+    },
+    {
+      "distance_m": 19441.216326756177,
+      "elevation_m": 204.949,
+      "source": "lutning_end",
+      "description": "Lutning 16.764‰ 716+673->716+779 längd 106.074 m"
+    },
+    {
+      "distance_m": 19550.917702804578,
+      "elevation_m": 203.171,
+      "source": "lutning_start",
+      "description": "Lutning 16.764‰ 716+673->716+779 längd 106.074 m"
+    },
+    {
+      "distance_m": 19571.24705476368,
+      "elevation_m": 202.765,
+      "source": "lutning_end",
+      "description": "Lutning 17.164‰ 716+593->716+649 längd 56.202 m"
+    },
+    {
+      "distance_m": 19627.430166544145,
+      "elevation_m": 201.8,
+      "source": "lutning_start",
+      "description": "Lutning 17.164‰ 716+593->716+649 längd 56.202 m"
+    },
+    {
+      "distance_m": 19912.170585887558,
+      "elevation_m": 197.03,
+      "source": "lutning_start",
+      "description": "Lutning 16.75‰ 716+308->716+593 längd 284.78 m"
+    },
+    {
+      "distance_m": 20049.586308815058,
+      "elevation_m": 195.587,
+      "source": "lutning_end",
+      "description": "Lutning 4.255‰ 716+123->716+170 längd 47.085 m"
+    },
+    {
+      "distance_m": 20096.671556843987,
+      "elevation_m": 195.386,
+      "source": "lutning_start",
+      "description": "Lutning 4.255‰ 716+123->716+170 längd 47.085 m"
+    },
+    {
+      "distance_m": 20187.29917477154,
+      "elevation_m": 194.659,
+      "source": "lutning_end",
+      "description": "Lutning 11.808‰ 716+16->716+33 längd 16.459 m"
+    },
+    {
+      "distance_m": 20203.74320608902,
+      "elevation_m": 194.464,
+      "source": "lutning_start",
+      "description": "Lutning 11.808‰ 716+16->716+33 längd 16.459 m"
+    },
+    {
+      "distance_m": 20403.48558195935,
+      "elevation_m": 193.012,
+      "source": "lutning_end",
+      "description": "Lutning 2.727‰ 715+748->715+813 längd 64.349 m"
+    },
+    {
+      "distance_m": 20467.83414369182,
+      "elevation_m": 192.837,
+      "source": "lutning_start",
+      "description": "Lutning 2.727‰ 715+748->715+813 längd 64.349 m"
+    },
+    {
+      "distance_m": 20523.52739494078,
+      "elevation_m": 192.647,
+      "source": "lutning_end",
+      "description": "Lutning 4.114‰ 715+642->715+693 längd 50.766 m"
+    },
+    {
+      "distance_m": 20571.48631815792,
+      "elevation_m": 192.438,
+      "source": "lutning_start",
+      "description": "Lutning 4.114‰ 715+642->715+693 längd 50.766 m"
+    },
+    {
+      "distance_m": 20601.014801808495,
+      "elevation_m": 192.371,
+      "source": "lutning_end",
+      "description": "Lutning 0.057‰ 715+553->715+610 längd 56.867 m"
+    },
+    {
+      "distance_m": 20663.989004288764,
+      "elevation_m": 192.367,
+      "source": "lutning_start",
+      "description": "Lutning 0.057‰ 715+553->715+610 längd 56.867 m"
+    },
+    {
+      "distance_m": 20861.690788650914,
+      "elevation_m": 193.758,
+      "source": "lutning_end",
+      "description": "Lutning -14.093‰ 715+10->715+355 längd 344.35 m"
+    },
+    {
+      "distance_m": 21209.70672474155,
+      "elevation_m": 198.611,
+      "source": "lutning_start",
+      "description": "Lutning -14.093‰ 715+10->715+355 längd 344.35 m"
+    },
+    {
+      "distance_m": 21226.601467744582,
+      "elevation_m": 198.894,
+      "source": "lutning_end",
+      "description": "Lutning -13.429‰ 714+527->714+989 längd 462.835 m"
+    },
+    {
+      "distance_m": 21691.65464312198,
+      "elevation_m": 205.109,
+      "source": "lutning_start",
+      "description": "Lutning -13.429‰ 714+527->714+989 längd 462.835 m"
+    },
+    {
+      "distance_m": 21710.410379550085,
+      "elevation_m": 205.398,
+      "source": "lutning_end",
+      "description": "Lutning -13.955‰ 713+796->714+505 längd 708.533 m"
+    },
+    {
+      "distance_m": 22418.88756369338,
+      "elevation_m": 215.285,
+      "source": "lutning_start",
+      "description": "Lutning -13.955‰ 713+796->714+505 längd 708.533 m"
+    },
+    {
+      "distance_m": 22695.39298006242,
+      "elevation_m": 215.109,
+      "source": "lutning_end",
+      "description": "Lutning 15.192‰ 713+265->713+510 längd 245.699 m"
+    },
+    {
+      "distance_m": 22950.131765323473,
+      "elevation_m": 211.376,
+      "source": "lutning_start",
+      "description": "Lutning 15.192‰ 713+265->713+510 längd 245.699 m"
+    },
+    {
+      "distance_m": 23057.628221152758,
+      "elevation_m": 210.471,
+      "source": "lutning_end",
+      "description": "Lutning 2.081‰ 712+711->713+160 längd 447.686 m"
+    },
+    {
+      "distance_m": 23497.451460853987,
+      "elevation_m": 209.539,
+      "source": "lutning_start",
+      "description": "Lutning 2.081‰ 712+711->713+160 längd 447.686 m"
+    },
+    {
+      "distance_m": 23627.049775851938,
+      "elevation_m": 208.684,
+      "source": "lutning_end",
+      "description": "Lutning 11.654‰ 712+303->712+587 längd 284.498 m"
+    },
+    {
+      "distance_m": 23916.44770467229,
+      "elevation_m": 205.369,
+      "source": "lutning_start",
+      "description": "Lutning 11.654‰ 712+303->712+587 längd 284.498 m"
+    },
+    {
+      "distance_m": 23931.61243403046,
+      "elevation_m": 205.139,
+      "source": "lutning_end",
+      "description": "Lutning 11.152‰ 711+546->712+282 längd 735.818 m"
+    },
+    {
+      "distance_m": 24671.462078619374,
+      "elevation_m": 196.934,
+      "source": "lutning_start",
+      "description": "Lutning 11.152‰ 711+546->712+282 längd 735.818 m"
+    },
+    {
+      "distance_m": 24697.67982076354,
+      "elevation_m": 196.574,
+      "source": "lutning_end",
+      "description": "Lutning 12.532‰ 711+496->711+516 längd 20.0 m"
+    },
+    {
+      "distance_m": 24717.67216901803,
+      "elevation_m": 196.324,
+      "source": "lutning_start",
+      "description": "Lutning 12.532‰ 711+496->711+516 längd 20.0 m"
+    },
+    {
+      "distance_m": 24757.515247646083,
+      "elevation_m": 195.846,
+      "source": "lutning_end",
+      "description": "Lutning 11.539‰ 711+356->711+456 längd 99.997 m"
+    },
+    {
+      "distance_m": 24860.654781293273,
+      "elevation_m": 194.692,
+      "source": "lutning_start",
+      "description": "Lutning 11.539‰ 711+356->711+456 längd 99.997 m"
+    },
+    {
+      "distance_m": 25045.13234801768,
+      "elevation_m": 193.627,
+      "source": "lutning_end",
+      "description": "Lutning -0.201‰ 711+8->711+168 längd 160.497 m"
+    },
+    {
+      "distance_m": 25208.985055259946,
+      "elevation_m": 193.66,
+      "source": "lutning_start",
+      "description": "Lutning -0.201‰ 711+8->711+168 längd 160.497 m"
+    },
+    {
+      "distance_m": 25339.2233570302,
+      "elevation_m": 192.695,
+      "source": "lutning_end",
+      "description": "Lutning 14.647‰ 710+484->710+874 längd 389.813 m"
+    },
+    {
+      "distance_m": 25728.64348922319,
+      "elevation_m": 186.985,
+      "source": "lutning_start",
+      "description": "Lutning 14.647‰ 710+484->710+874 längd 389.813 m"
+    },
+    {
+      "distance_m": 25868.759148125704,
+      "elevation_m": 185.825,
+      "source": "lutning_end",
+      "description": "Lutning 1.905‰ 710+257->710+344 längd 86.996 m"
+    },
+    {
+      "distance_m": 25955.754655152938,
+      "elevation_m": 185.659,
+      "source": "lutning_start",
+      "description": "Lutning 1.905‰ 710+257->710+344 längd 86.996 m"
+    },
+    {
+      "distance_m": 26077.233800737627,
+      "elevation_m": 184.819,
+      "source": "lutning_end",
+      "description": "Lutning 11.985‰ 709+908->710+136 längd 227.741 m"
+    },
+    {
+      "distance_m": 26304.427313529308,
+      "elevation_m": 182.09,
+      "source": "lutning_start",
+      "description": "Lutning 11.985‰ 709+908->710+136 längd 227.741 m"
+    },
+    {
+      "distance_m": 26331.925279735267,
+      "elevation_m": 181.735,
+      "source": "lutning_end",
+      "description": "Lutning 13.821‰ 709+824->709+881 längd 56.803 m"
+    },
+    {
+      "distance_m": 26388.727963570353,
+      "elevation_m": 180.95,
+      "source": "lutning_start",
+      "description": "Lutning 13.821‰ 709+824->709+881 längd 56.803 m"
+    },
+    {
+      "distance_m": 26423.495298235714,
+      "elevation_m": 180.539,
+      "source": "lutning_end",
+      "description": "Lutning 10.427‰ 709+669->709+790 längd 121.035 m"
+    },
+    {
+      "distance_m": 26543.643145187765,
+      "elevation_m": 179.277,
+      "source": "lutning_start",
+      "description": "Lutning 10.427‰ 709+669->709+790 längd 121.035 m"
+    },
+    {
+      "distance_m": 26563.87440558285,
+      "elevation_m": 179.028,
+      "source": "lutning_end",
+      "description": "Lutning 14.175‰ 709+627->709+649 längd 21.178 m"
+    },
+    {
+      "distance_m": 26585.051392602203,
+      "elevation_m": 178.728,
+      "source": "lutning_start",
+      "description": "Lutning 14.175‰ 709+627->709+649 längd 21.178 m"
+    },
+    {
+      "distance_m": 26726.47099814123,
+      "elevation_m": 176.995,
+      "source": "lutning_end",
+      "description": "Lutning 11.471‰ 709+415->709+492 längd 76.761 m"
+    },
+    {
+      "distance_m": 26796.92662028441,
+      "elevation_m": 176.114,
+      "source": "lutning_start",
+      "description": "Lutning 11.471‰ 709+415->709+492 längd 76.761 m"
+    },
+    {
+      "distance_m": 26823.16980709983,
+      "elevation_m": 175.802,
+      "source": "lutning_end",
+      "description": "Lutning 12.345‰ 708+421->709+389 längd 967.837 m"
+    },
+    {
+      "distance_m": 27790.827786155853,
+      "elevation_m": 163.853,
+      "source": "lutning_start",
+      "description": "Lutning 12.345‰ 708+421->709+389 längd 967.837 m"
+    },
+    {
+      "distance_m": 27815.109259847995,
+      "elevation_m": 163.568,
+      "source": "lutning_end",
+      "description": "Lutning 11.131‰ 708+187->708+397 längd 210.0 m"
+    },
+    {
+      "distance_m": 28025.095271256025,
+      "elevation_m": 161.231,
+      "source": "lutning_start",
+      "description": "Lutning 11.131‰ 708+187->708+397 längd 210.0 m"
+    },
+    {
+      "distance_m": 28117.433898004052,
+      "elevation_m": 159.425,
+      "source": "lutning_start",
+      "description": "Lutning 11.577‰ 708+24->708+59 längd 35.0 m"
+    },
+    {
+      "distance_m": 28117.433898004052,
+      "elevation_m": 159.83,
+      "source": "lutning_end",
+      "description": "Lutning 11.577‰ 708+24->708+59 längd 35.0 m"
+    },
+    {
+      "distance_m": 28117.433898004052,
+      "elevation_m": 159.425,
+      "source": "lutning_start",
+      "description": "Lutning 11.577‰ 708+24->708+59 längd 35.0 m"
+    },
+    {
+      "distance_m": 28117.433898004052,
+      "elevation_m": 159.83,
+      "source": "lutning_end",
+      "description": "Lutning 11.577‰ 708+24->708+59 längd 35.0 m"
+    }
+  ],
+  "notes": "Första profilversion från BIS_DK_O_4015_Lutning, projekterad mot level1-korridoren via närmaste ruttvertex."
+}
