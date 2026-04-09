@@ -1,70 +1,110 @@
 # Banprofil
 
-Python-modul för analys av Trafikverkets järnvägsnät med fokus på `Net_JVG` som topologisk ryggrad.
+Banprofil är ett Python-projekt för analys av Trafikverkets järnvägsdata med fokus på `Net_JVG` som nätverksryggrad.
 
-## Innehåll
+Projektet används för att:
+- hitta och verifiera järnvägskorridorer mellan referenspunkter
+- exportera KML för visuell kontroll
+- analysera nätverkstopologi och connector-problem
+- bygga en första höjdprofil längs en verklig järnvägsrutt
 
-- `banprofil/config_loader.py` - laddar `config.json` och faller tillbaka till `config.example.json`
-- `banprofil/coordinate_transform.py` - omvandling från WGS84 (EPSG:4326) till SWEREF 99 TM (EPSG:3006)
-- `banprofil/trafikverket_gpkg.py` - generell läsare för Trafikverkets GeoPackage-lager
-- `banprofil/master_network_analyzer.py` - analys av masterpaketets nätverk och föräldralager
-- `banprofil/net_jvg_resolver.py` - nätverksförst-resolver och traversal över `Net_JVG`
-- `banprofil/feature_projection.py` - första projektion av featurelager ovanpå traverserad `Net_JVG`-korridor
-- `main.py` - fokuserad demo för masteranalys, traversal och feature projection
+## Status
 
-## Konfiguration
+**Version:** `0.1 Alpha`
 
-- `config.json` används om den finns
-- annars används `config.example.json` som fallback
-- `config.json` är ignorerad i git och är avsedd för riktiga lokala filvägar
+Det här är en tidig men fungerande alpha.
 
-Exempel:
+Det viktigaste som nu fungerar:
+- korrekt tolkning av GeoPackageBinary för `Net_JVG_Node`, `Net_JVG_Link` och `Net_JVG_LinkSequence`
+- KML-export för level1 och level2 corridor checks
+- bakgrunds-KML för nätlagren i level2-området
+- första höjdprofil för level1-rutten baserad på `BIS_DK_O_4015_Lutning`
+- lokal analys av gap och connector-kandidater
+- första `networkx`-baserade grafgrund
 
-```json
-{
-  "trafikverket_gpkg_path": "C:/data/trafikverket/master/Master_All_194445.gpkg",
-  "trafikverket_gpkg_glob": "C:/data/trafikverket/master/**/*.gpkg"
-}
-```
+## Viktig teknisk lärdom
 
-## Arkitektur just nu
+Den största felkällan tidigt i projektet var **felaktig tolkning av GeoPackage-geometrin**.
 
-Projektet utgår nu från expertbekräftad modell:
-- `Net_JVG_*` är själva järnvägsnätet
-- övriga BIS-lager är features på nätverket
+Verifierad GeoPackageBinary-header gav:
+- `Net_JVG_Node` → `wkb_offset = 8`
+- `Net_JVG_Link` → `wkb_offset = 56`
+- `Net_JVG_LinkSequence` → `wkb_offset = 56`
 
-Det betyder att Banprofil nu bygger vidare på:
-1. `Net_JVG_Node`
-2. `Net_JVG_Link`
-3. `Net_JVG_LinkSequence`
+När geometrin började läsas korrekt försvann de flesta tidigare "gap" i level1-analysen.
 
-Och först därefter projiceras featurelager som:
-- `raklinje`
-- `lutning`
-- `cirkularkurva`
-- `overgangskurva`
+## Projektstruktur
 
-## Demo
+### Kärnmoduler
 
-Kör allt:
+- `banprofil/net_jvg_resolver.py`
+  - matchning av referenspunkter till Net_JVG
+  - traversal och constrained routing
+- `banprofil/net_jvg_kml.py`
+  - export av korridorer och traversaler till KML
+- `banprofil/geopackage_geometry.py`
+  - korrekt läsning av GeoPackageBinary via verifierad WKB-offset
+- `banprofil/gpkg_inspector.py`
+  - inspektion av GeoPackage-header och RTree-frågor
+- `banprofil/height_profile.py`
+  - första höjdprofil längs verifierad korridor
+- `banprofil/rail_graph.py`
+  - första `networkx`-baserade grafmodell
+- `banprofil/local_gap_repair.py`
+  - analys av lokala gap mellan ankarssegment
+- `banprofil/local_connector_search.py`
+  - sökning efter connector-kandidater i lokal korridor
 
-```bash
-python main.py
-```
+### Exempel och verifiering
 
-Kör separata delar:
+- `examples/reference_corridor_visual_check.py`
+  - **level1 corridor check**
+- `examples/level2_corridor_check.py`
+  - första **level2 corridor check**
+- `examples/level2_corridor_check_wide.py`
+  - bredare level2-variant med större sökfönster
+- `examples/export_level2_network_layers_kml.py`
+  - KML per nätlager i level2-området
+- `examples/level1_height_profile.py`
+  - bygger första höjdprofilen för level1
 
-```bash
-python run_master_analysis.py
-python run_traversal_demo.py
-python run_feature_projection.py
-python run_traversal_kml.py
-```
+## Nuvarande arbetssätt
 
-Det här gör det lättare att verifiera varje steg separat.
+1. Matcha referenspunkter mot `Net_JVG_Node`
+2. Bygg och verifiera korridor med KML
+3. Kontrollera korridoren visuellt
+4. Förfina routing eller urval om korridoren inte är giltig
+5. Bygg höjdprofil längs verifierad korridor
+
+## Filer med verifierad nytta just nu
+
+### Behåll
+
+- `examples/reference_corridor_visual_check.kml`
+- `examples/level2_corridor_check.kml`
+- `examples/level2_corridor_check_wide.kml`
+- `examples/level1_height_profile.json`
+- `examples/level1_height_profile.csv`
+- `examples/level2_network_layers/Net_JVG_Link.kml`
+- `examples/level2_network_layers/Net_JVG_Node.kml`
+- `examples/level2_network_layers/Net_JVG_LinkSequence.kml`
+
+### Historiska eller sekundära debugfiler
+
+Äldre proof-of-concept-KML:er kan tas bort eller arkiveras när de inte längre behövs.
 
 ## Nästa steg
 
-- traversal längs bättre vald korridor än första startnod
-- exakt projektion av featuresegment mot traverserade länkar
-- senare återkoppling till höjdprofil och exportformat ovanpå korrekt nätverkskedja
+- förbättra routing längs verklig bana i svårare level2-fall
+- låta bbox/RTree-urval växa adaptivt när koppling saknas
+- förbättra höjdprofilen med bättre projektion mot linjen, inte bara närmaste vertex
+- integrera `Vertikalkurva` och fler vertikalgeometriska lager
+- förfina hur profilkedjan byggs längs hela korridoren
+
+## Utvecklingsprincip
+
+Projektet bygger på en viktig princip:
+
+> Det måste vara tillåtet att göra fel, för det är så vi lär oss att göra rätt.
+
+Det har redan visat sig sant i Banprofil. Många tidiga antaganden var fel, men varje fel ledde till bättre förståelse av både järnvägsnätet och GeoPackage-datan.
