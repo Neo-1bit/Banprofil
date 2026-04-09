@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .config_loader import load_config
+from .geopackage_geometry import line_vertices_xy, point_xy
 from .trafikverket_gpkg import TrafikverketGeoPackage
 
 
@@ -232,12 +233,7 @@ class NetJvgResolver:
         tuple[float, float] | None
             Easting och northing i SWEREF 99 TM, eller `None` om tolkning misslyckas.
         """
-        if not isinstance(geom, bytes) or len(geom) < 29:
-            return None
-        return (
-            struct.unpack('<d', geom[13:21])[0],
-            struct.unpack('<d', geom[21:29])[0],
-        )
+        return point_xy(geom)
 
     def load_nodes(self, limit: int | None = None, include_geom: bool = False) -> list[NetJvgNode]:
         """
@@ -355,21 +351,7 @@ class NetJvgResolver:
         list[tuple[float, float]]
             Vertexlista i SWEREF 99 TM.
         """
-        if not isinstance(geom, bytes) or len(geom) < 65:
-            return []
-        point_count = struct.unpack('<I', geom[57:61])[0] - 3000
-        if point_count <= 0:
-            return []
-        offset = 65
-        points: list[tuple[float, float]] = []
-        for _ in range(point_count):
-            if offset + 32 > len(geom):
-                break
-            x = struct.unpack('<d', geom[offset:offset + 8])[0]
-            y = struct.unpack('<d', geom[offset + 8:offset + 16])[0]
-            points.append((x, y))
-            offset += 32
-        return points
+        return line_vertices_xy(geom)
 
     def _link_direction(self, link: NetJvgLink, from_node_oid: str) -> tuple[float, float]:
         """

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import math
-import struct
 from dataclasses import dataclass
 
 import networkx as nx
+from shapely.geometry import Point
+from shapely.strtree import STRtree
 
 from .config_loader import load_config
+from .geopackage_geometry import line_vertices_xy, point_xy
 from .trafikverket_gpkg import TrafikverketGeoPackage
 
 
@@ -43,6 +45,29 @@ class RailGraphPath:
     total_cost: float
 
 
+@dataclass(frozen=True, slots=True)
+class RepairGraphSummary:
+    """
+    Sammanfattning av reparerad graf.
+
+    Parameters
+    ----------
+    snapped_start_endpoints : int
+        Antal saknade startändpunkter som kunnat snappas mot existerande nod.
+    snapped_end_endpoints : int
+        Antal saknade slutändpunkter som kunnat snappas mot existerande nod.
+    synthetic_nodes_created : int
+        Antal syntetiska noder som skapats från geometriändpunkter.
+    missing_links_after_repair : int
+        Antal länkar som fortfarande inte kunde föras in i grafen.
+    """
+
+    snapped_start_endpoints: int
+    snapped_end_endpoints: int
+    synthetic_nodes_created: int
+    missing_links_after_repair: int
+
+
 class RailGraph:
     """
     NetworkX-baserad grafmodell för Trafikverkets Net_JVG-nät.
@@ -67,6 +92,7 @@ class RailGraph:
         """
         self.gpkg = gpkg
         self.graph = nx.Graph()
+        self.repair_summary: RepairGraphSummary | None = None
 
     @classmethod
     def from_config_file(cls, config_path: str = "config.json") -> "RailGraph":
@@ -105,12 +131,7 @@ class RailGraph:
         tuple[float, float] | None
             Easting och northing i SWEREF 99 TM.
         """
-        if not isinstance(geom, bytes) or len(geom) < 29:
-            return None
-        return (
-            struct.unpack('<d', geom[13:21])[0],
-            struct.unpack('<d', geom[21:29])[0],
-        )
+        return point_xy(geom)
 
     def _decode_link_vertices(self, geom: bytes | None) -> list[tuple[float, float]]:
         """
@@ -126,25 +147,19 @@ class RailGraph:
         list[tuple[float, float]]
             Vertexlista i SWEREF 99 TM.
         """
-        if not isinstance(geom, bytes) or len(geom) < 65:
-            return []
-        point_count = struct.unpack('<I', geom[57:61])[0] - 3000
-        if point_count <= 0:
-            return []
-        offset = 65
-        points: list[tuple[float, float]] = []
-        for _ in range(point_count):
-            if offset + 32 > len(geom):
-                break
-            x = struct.unpack('<d', geom[offset:offset + 8])[0]
-            y = struct.unpack('<d', geom[offset + 8:offset + 16])[0]
-            points.append((x, y))
-            offset += 32
-        return points
+        return line_vertices_xy(geom)
 
-    def build(self) -> None:
+    def build(self, repair_missing_nodes: bool = False, snap_tolerance_m: float = 25.0) -> None:
         """
         Bygger graf från `Net_JVG_Node` och `Net_JVG_Link`.
+
+        Parameters
+        ----------
+        repair_missing_nodes : bool, optional
+            Om `True` försöker grafen reparera länkar med saknade noder genom
+            snapping eller syntetiska noder från geometriändpunkter.
+        snap_tolerance_m : float, optional
+            Maxavstånd i meter för snapping av geometriändpunkt mot existerande nod.
 
         Returns
         -------
@@ -152,6 +167,7 @@ class RailGraph:
             Uppdaterar `self.graph` in-place.
         """
         self.graph.clear()
+        self.repair_summary = None
 
         node_rows = self.gpkg.fetch_rows(
             "Net_JVG_Node",
@@ -167,6 +183,7 @@ class RailGraph:
                 str(row["OID"]),
                 easting=easting,
                 northing=northing,
+                synthetic=False,
             )
 
         link_rows = self.gpkg.fetch_rows(
@@ -184,14 +201,65 @@ class RailGraph:
                 "EXTENT_LENGTH",
             ],
         )
+
+        synthetic_node_counter = 0
+        snapped_start_endpoints = 0
+        snapped_end_endpoints = 0
         missing_node_link_count = 0
+
+        def nearest_existing_node(point_xy: tuple[float, float]) -> tuple[str, float] | None:
+            point = Point(point_xy[0], point_xy[1])
+            current_node_ids = list(self.graph.nodes)
+            current_points = [
+                Point(self.graph.nodes[node_oid]["easting"], self.graph.nodes[node_oid]["northing"])
+                for node_oid in current_node_ids
+            ]
+            point_index = STRtree(current_points)
+            nearest_index = point_index.nearest(point)
+            if nearest_index is None:
+                return None
+            nearest_point = current_points[int(nearest_index)]
+            nearest_node_oid = current_node_ids[int(nearest_index)]
+            return nearest_node_oid, point.distance(nearest_point)
+
+        def resolve_endpoint(node_oid: str, fallback_point: tuple[float, float], endpoint_role: str) -> str:
+            nonlocal synthetic_node_counter, snapped_start_endpoints, snapped_end_endpoints
+            if node_oid in self.graph:
+                return node_oid
+            if repair_missing_nodes:
+                nearest = nearest_existing_node(fallback_point)
+                if nearest is not None:
+                    nearest_node_oid, nearest_distance = nearest
+                    if nearest_distance <= snap_tolerance_m:
+                        if endpoint_role == "start":
+                            snapped_start_endpoints += 1
+                        else:
+                            snapped_end_endpoints += 1
+                        return nearest_node_oid
+
+                synthetic_node_counter += 1
+                synthetic_node_oid = f"synthetic:{synthetic_node_counter}"
+                self.graph.add_node(
+                    synthetic_node_oid,
+                    easting=fallback_point[0],
+                    northing=fallback_point[1],
+                    synthetic=True,
+                )
+                return synthetic_node_oid
+            raise RailGraphError(f"Link endpoint node is missing from graph: {node_oid}")
+
         for row in link_rows:
+            vertices = self._decode_link_vertices(row.get("geom"))
+            if len(vertices) < 2:
+                continue
             start_node_oid = str(row["START_NODE_OID"])
             end_node_oid = str(row["END_NODE_OID"])
             if start_node_oid not in self.graph or end_node_oid not in self.graph:
-                missing_node_link_count += 1
-                continue
-            vertices = self._decode_link_vertices(row.get("geom"))
+                if not repair_missing_nodes:
+                    missing_node_link_count += 1
+                    continue
+                start_node_oid = resolve_endpoint(start_node_oid, vertices[0], "start")
+                end_node_oid = resolve_endpoint(end_node_oid, vertices[-1], "end")
             self.graph.add_edge(
                 start_node_oid,
                 end_node_oid,
@@ -203,7 +271,15 @@ class RailGraph:
                 extent_length=float(row["EXTENT_LENGTH"]),
                 vertices=vertices,
             )
+
         self.graph.graph["missing_node_link_count"] = missing_node_link_count
+        if repair_missing_nodes:
+            self.repair_summary = RepairGraphSummary(
+                snapped_start_endpoints=snapped_start_endpoints,
+                snapped_end_endpoints=snapped_end_endpoints,
+                synthetic_nodes_created=synthetic_node_counter,
+                missing_links_after_repair=missing_node_link_count,
+            )
 
     def nearest_node(self, easting: float, northing: float) -> tuple[str, float]:
         """
@@ -283,12 +359,22 @@ class RailGraph:
         dict[str, int]
             Antal noder, kanter, komponenter och länkar med saknade noder.
         """
-        return {
+        summary = {
             "node_count": self.graph.number_of_nodes(),
             "edge_count": self.graph.number_of_edges(),
             "connected_components": nx.number_connected_components(self.graph),
             "missing_node_link_count": int(self.graph.graph.get("missing_node_link_count", 0)),
         }
+        if self.repair_summary is not None:
+            summary.update(
+                {
+                    "snapped_start_endpoints": self.repair_summary.snapped_start_endpoints,
+                    "snapped_end_endpoints": self.repair_summary.snapped_end_endpoints,
+                    "synthetic_nodes_created": self.repair_summary.synthetic_nodes_created,
+                    "missing_links_after_repair": self.repair_summary.missing_links_after_repair,
+                }
+            )
+        return summary
 
     def connected_component_size(self, node_oid: str) -> int:
         """

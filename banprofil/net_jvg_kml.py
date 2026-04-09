@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import math
-import struct
 from dataclasses import dataclass
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+from .geopackage_geometry import line_vertices_xy
 from .net_jvg_resolver import NetJvgResolver, TraversalResult
 
 
@@ -115,9 +115,6 @@ def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     """
     Dekodar vertices ur GeoPackage-linjegeometri för `Net_JVG_Link`.
 
-    Trafikverkets masterdata använder här en generell GEOMETRY med Z och M,
-    där WKB-delen innehåller 4D-koordinater per vertex.
-
     Parameters
     ----------
     geom : bytes
@@ -128,21 +125,7 @@ def _decode_link_vertices(geom: bytes) -> list[tuple[float, float]]:
     list[tuple[float, float]]
         Vertexlista i SWEREF 99 TM.
     """
-    if not isinstance(geom, bytes) or len(geom) < 65:
-        return []
-    point_count = struct.unpack('<I', geom[57:61])[0] - 3000
-    if point_count <= 0:
-        return []
-    offset = 65
-    points: list[tuple[float, float]] = []
-    for _ in range(point_count):
-        if offset + 32 > len(geom):
-            break
-        x = struct.unpack('<d', geom[offset:offset + 8])[0]
-        y = struct.unpack('<d', geom[offset + 8:offset + 16])[0]
-        points.append((x, y))
-        offset += 32
-    return points
+    return line_vertices_xy(geom)
 
 
 def _distance(point_a: tuple[float, float], point_b: tuple[float, float]) -> float:
