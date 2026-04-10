@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neo-1bit.github.io/banprofil/schemas/banprofil-route.schema.json",
+  "title": "Banprofil RouteDefinition",
+  "description": "Schema for exported Banprofil route packages consumed by the Android app.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "route_id",
+    "name",
+    "start_location",
+    "end_location",
+    "total_length_m",
+    "version",
+    "geometry",
+    "profile_segments",
+    "horizontal_segments",
+    "reference_points"
+  ],
+  "properties": {
+    "route_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "start_location": {
+      "type": "string",
+      "minLength": 1
+    },
+    "end_location": {
+      "type": "string",
+      "minLength": 1
+    },
+    "via_points": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "default": []
+    },
+    "total_length_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object",
+      "default": {}
+    },
+    "geometry": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/routeGeometryPoint"
+      }
+    },
+    "profile_segments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/profileSegment"
+      }
+    },
+    "horizontal_segments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/horizontalSegment"
+      }
+    },
+    "reference_points": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/referencePoint"
+      }
+    }
+  },
+  "$defs": {
+    "routeGeometryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainage_m", "lat", "lon"],
+      "properties": {
+        "chainage_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "altitude_m": {
+          "type": "number"
+        }
+      }
+    },
+    "profileSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_m",
+        "end_m",
+        "start_elevation_m",
+        "end_elevation_m",
+        "segment_type"
+      ],
+      "properties": {
+        "start_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "start_elevation_m": {
+          "type": "number"
+        },
+        "end_elevation_m": {
+          "type": "number"
+        },
+        "gradient_permille": {
+          "type": "number"
+        },
+        "segment_type": {
+          "type": "string",
+          "enum": [
+            "uphill",
+            "downhill",
+            "level",
+            "crest_transition",
+            "sag_transition"
+          ]
+        }
+      }
+    },
+    "horizontalSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_m", "end_m", "geometry_type", "turn_direction"],
+      "properties": {
+        "start_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "geometry_type": {
+          "type": "string",
+          "enum": ["straight", "curve", "transition"]
+        },
+        "turn_direction": {
+          "type": "string",
+          "enum": ["left", "right", "none"]
+        },
+        "radius_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "referencePoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chainage_m", "label", "category"],
+      "properties": {
+        "chainage_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": ["station", "driftplats", "control_point", "profile_change"]
+        },
+        "metadata": {
+          "type": "object",
+          "default": {}
+        }
+      }
+    }
+  }
+}

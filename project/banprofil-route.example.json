@@ -1,0 +1,84 @@
+{
+  "route_id": "route-hallsberg-mjolby",
+  "name": "Hallsberg -> Mjölby",
+  "start_location": "Hallsberg",
+  "end_location": "Mjölby",
+  "via_points": [
+    "Degerön"
+  ],
+  "total_length_m": 83000,
+  "version": "1.0.0",
+  "metadata": {
+    "source": "Banprofil",
+    "country": "SE"
+  },
+  "geometry": [
+    {
+      "chainage_m": 0,
+      "lat": 59.065,
+      "lon": 15.109,
+      "altitude_m": 88.2
+    },
+    {
+      "chainage_m": 50,
+      "lat": 59.0647,
+      "lon": 15.112,
+      "altitude_m": 88.8
+    },
+    {
+      "chainage_m": 100,
+      "lat": 59.0642,
+      "lon": 15.115,
+      "altitude_m": 89.1
+    }
+  ],
+  "profile_segments": [
+    {
+      "start_m": 0,
+      "end_m": 800,
+      "start_elevation_m": 88.2,
+      "end_elevation_m": 93.4,
+      "gradient_permille": 6.5,
+      "segment_type": "uphill"
+    },
+    {
+      "start_m": 800,
+      "end_m": 1400,
+      "start_elevation_m": 93.4,
+      "end_elevation_m": 92.9,
+      "gradient_permille": -0.8,
+      "segment_type": "level"
+    }
+  ],
+  "horizontal_segments": [
+    {
+      "start_m": 0,
+      "end_m": 1200,
+      "geometry_type": "straight",
+      "turn_direction": "none"
+    },
+    {
+      "start_m": 1200,
+      "end_m": 1800,
+      "geometry_type": "curve",
+      "turn_direction": "right",
+      "radius_m": 950
+    }
+  ],
+  "reference_points": [
+    {
+      "chainage_m": 0,
+      "label": "Hallsberg",
+      "category": "station",
+      "metadata": {}
+    },
+    {
+      "chainage_m": 800,
+      "label": "Lutningsändring",
+      "category": "profile_change",
+      "metadata": {
+        "note": "Övergår till flackare parti"
+      }
+    }
+  ]
+}
