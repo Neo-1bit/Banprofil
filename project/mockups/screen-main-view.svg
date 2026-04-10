@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect width="1080" height="1920" fill="#0b1220"/>
+  <rect x="30" y="30" width="1020" height="1860" rx="55" fill="#0b1220" stroke="#3a4b68" stroke-width="6"/>
+  <rect x="430" y="55" width="220" height="25" rx="12" fill="#22304a"/>
+  <text x="70" y="155" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="52" font-weight="700">Aktiv körning</text>
+  
+<rect x="70" y="230" width="940" height="130" rx="24" fill="#111a2b"/>
+<text x="95" y="280" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="28">Rutt: Hallsberg → Mjölby</text>
+<text x="95" y="325" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="22">Pos 42,3 km   Hast 118   Max 120   Status God</text>
+
+<rect x="70" y="390" width="940" height="590" rx="28" fill="#111a2b"/>
+<text x="95" y="440" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Planvy</text>
+<g stroke="#24324a" stroke-width="2">
+<line x1="120" y1="500" x2="120" y2="930"/><line x1="240" y1="500" x2="240" y2="930"/><line x1="360" y1="500" x2="360" y2="930"/><line x1="480" y1="500" x2="480" y2="930"/><line x1="600" y1="500" x2="600" y2="930"/><line x1="720" y1="500" x2="720" y2="930"/><line x1="840" y1="500" x2="840" y2="930"/>
+<line x1="100" y1="540" x2="980" y2="540"/><line x1="100" y1="640" x2="980" y2="640"/><line x1="100" y1="740" x2="980" y2="740"/><line x1="100" y1="840" x2="980" y2="840"/>
+</g>
+<polyline points="220,900 300,820 420,760 510,680 620,600 760,560 860,500" fill="none" stroke="#4da3ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="510" cy="680" r="18" fill="#f4c95d"/>
+<polygon points="815,490 875,500 830,545" fill="#32c48d"/>
+
+<rect x="70" y="1020" width="940" height="520" rx="28" fill="#111a2b"/>
+<text x="95" y="1070" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Profil 3 km framåt</text>
+<g stroke="#24324a" stroke-width="2">
+<line x1="120" y1="1140" x2="120" y2="1480"/><line x1="240" y1="1140" x2="240" y2="1480"/><line x1="360" y1="1140" x2="360" y2="1480"/><line x1="480" y1="1140" x2="480" y2="1480"/><line x1="600" y1="1140" x2="600" y2="1480"/><line x1="720" y1="1140" x2="720" y2="1480"/><line x1="840" y1="1140" x2="840" y2="1480"/>
+<line x1="100" y1="1180" x2="980" y2="1180"/><line x1="100" y1="1260" x2="980" y2="1260"/><line x1="100" y1="1340" x2="980" y2="1340"/><line x1="100" y1="1420" x2="980" y2="1420"/>
+</g>
+<polyline points="120,1400 220,1380 320,1310 420,1260 520,1300 620,1410 720,1440 820,1350 920,1290" fill="none" stroke="#32c48d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<line x1="520" y1="1120" x2="520" y2="1470" stroke="#f4c95d" stroke-width="4"/>
+<text x="540" y="1450" fill="#f4c95d" font-family="DejaVu Sans, Arial" font-size="22">nu</text>
+
+<rect x="70" y="1580" width="940" height="180" rx="24" fill="#16233a"/>
+<text x="95" y="1630" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="28">Nästa förändring</text>
+<text x="95" y="1685" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Fall börjar om 650 m</text>
+
+</svg>

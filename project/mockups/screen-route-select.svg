@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect width="1080" height="1920" fill="#0b1220"/>
+  <rect x="30" y="30" width="1020" height="1860" rx="55" fill="#0b1220" stroke="#3a4b68" stroke-width="6"/>
+  <rect x="430" y="55" width="220" height="25" rx="12" fill="#22304a"/>
+  <text x="70" y="155" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="52" font-weight="700">Välj rutt</text>
+  
+<rect x="70" y="240" width="940" height="90" rx="24" fill="#111a2b"/>
+<text x="100" y="295" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">Sök rutt...</text>
+
+<rect x="70" y="380" width="940" height="180" rx="28" fill="#111a2b"/>
+<text x="105" y="445" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Hallsberg → Mjölby</text>
+<text x="105" y="495" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">Via Degerön, 83 km</text>
+<rect x="810" y="428" width="95" height="46" rx="16" fill="#4da3ff"/>
+<text x="835" y="459" fill="white" font-family="DejaVu Sans, Arial" font-size="24">Välj</text>
+
+<rect x="70" y="610" width="940" height="180" rx="28" fill="#111a2b"/>
+<text x="105" y="675" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Mjölby → Nässjö</text>
+<text x="105" y="725" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">Via Tranås, 96 km</text>
+<rect x="810" y="658" width="95" height="46" rx="16" fill="#4da3ff"/>
+<text x="835" y="689" fill="white" font-family="DejaVu Sans, Arial" font-size="24">Välj</text>
+
+</svg>

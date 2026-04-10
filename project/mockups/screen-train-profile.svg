@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <rect width="1080" height="1920" fill="#0b1220"/>
+  <rect x="30" y="30" width="1020" height="1860" rx="55" fill="#0b1220" stroke="#3a4b68" stroke-width="6"/>
+  <rect x="430" y="55" width="220" height="25" rx="12" fill="#22304a"/>
+  <text x="70" y="155" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="52" font-weight="700">Tåguppgifter</text>
+  
+<text x="90" y="340" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Maxhastighet</text>
+<rect x="90" y="370" width="900" height="90" rx="22" fill="#111a2b"/>
+<text x="120" y="425" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">120 km/h</text>
+<text x="90" y="530" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Längd</text>
+<rect x="90" y="560" width="900" height="90" rx="22" fill="#111a2b"/>
+<text x="120" y="615" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">630 m</text>
+<text x="90" y="720" fill="#e6eefc" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Vikt</text>
+<rect x="90" y="750" width="900" height="90" rx="22" fill="#111a2b"/>
+<text x="120" y="805" fill="#9fb3d1" font-family="DejaVu Sans, Arial" font-size="28">1850 ton</text>
+<rect x="90" y="980" width="900" height="110" rx="28" fill="#4da3ff"/>
+<text x="300" y="1048" fill="white" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Starta körning</text>
+
+</svg>
