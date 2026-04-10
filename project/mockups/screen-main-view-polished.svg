@@ -1,0 +1,60 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#08111d"/>
+      <stop offset="100%" stop-color="#0e1726"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101b2d"/>
+      <stop offset="100%" stop-color="#14233a"/>
+    </linearGradient>
+    <linearGradient id="ctaGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4da3ff"/>
+      <stop offset="100%" stop-color="#79b8ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+  <rect x="30" y="30" width="1020" height="1860" rx="55" fill="url(#bgGrad)" stroke="#31435f" stroke-width="5"/>
+  <rect x="430" y="55" width="220" height="25" rx="12" fill="#20314a"/>
+  <text x="70" y="155" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="52" font-weight="700">Aktiv körning</text>
+  <text x="70" y="200" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="24">Diskret förarstöd för energieffektiv körning</text>
+
+  <rect x="70" y="230" width="940" height="150" rx="28" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <text x="95" y="280" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="30" font-weight="700">Hallsberg → Mjölby</text>
+  <rect x="95" y="302" width="138" height="38" rx="12" fill="#1d3150"/><text x="118" y="328" fill="#79b8ff" font-family="DejaVu Sans, Arial" font-size="20">Status god</text>
+  <text x="95" y="360" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="22">Pos 42,3 km   Hast 118   Max 120   Framåt 3 km</text>
+
+  <rect x="70" y="410" width="940" height="600" rx="32" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <text x="95" y="465" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Planvy</text>
+  <text x="95" y="500" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="22">Kommande riktning och korridor längs rutten</text>
+  <g stroke="#20314f" stroke-width="2" opacity="0.9">
+    <line x1="120" y1="560" x2="960" y2="560"/><line x1="120" y1="660" x2="960" y2="660"/><line x1="120" y1="760" x2="960" y2="760"/><line x1="120" y1="860" x2="960" y2="860"/>
+    <line x1="180" y1="540" x2="180" y2="940"/><line x1="320" y1="540" x2="320" y2="940"/><line x1="460" y1="540" x2="460" y2="940"/><line x1="600" y1="540" x2="600" y2="940"/><line x1="740" y1="540" x2="740" y2="940"/><line x1="880" y1="540" x2="880" y2="940"/>
+  </g>
+  <polyline points="200,905 280,840 380,800 500,720 620,640 760,585 870,535" fill="none" stroke="#4da3ff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="225,930 305,865 405,825 525,745 645,665 785,610 895,560" fill="none" stroke="#2d5f96" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <circle cx="500" cy="720" r="22" fill="#ffd166" stroke="#fff3c4" stroke-width="4"/>
+  <polygon points="835,520 900,535 850,580" fill="#38d39f"/>
+
+  <rect x="70" y="1045" width="940" height="530" rx="32" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <text x="95" y="1100" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="34" font-weight="700">Profil 3 km framåt</text>
+  <text x="95" y="1135" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="22">Lutning och höjdutveckling längs vald rutt</text>
+  <g stroke="#20314f" stroke-width="2" opacity="0.9">
+    <line x1="120" y1="1210" x2="960" y2="1210"/><line x1="120" y1="1290" x2="960" y2="1290"/><line x1="120" y1="1370" x2="960" y2="1370"/><line x1="120" y1="1450" x2="960" y2="1450"/>
+    <line x1="180" y1="1180" x2="180" y2="1505"/><line x1="320" y1="1180" x2="320" y2="1505"/><line x1="460" y1="1180" x2="460" y2="1505"/><line x1="600" y1="1180" x2="600" y2="1505"/><line x1="740" y1="1180" x2="740" y2="1505"/><line x1="880" y1="1180" x2="880" y2="1505"/>
+  </g>
+  <polyline points="120,1420 220,1405 320,1335 430,1270 520,1305 620,1430 730,1460 840,1365 940,1305" fill="none" stroke="#38d39f" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="520" y1="1180" x2="520" y2="1505" stroke="#ffd166" stroke-width="5"/>
+  <circle cx="520" cy="1305" r="10" fill="#ffd166"/>
+  <text x="536" y="1490" fill="#ffd166" font-family="DejaVu Sans, Arial" font-size="20">nu</text>
+
+  <rect x="70" y="1610" width="940" height="190" rx="28" fill="#1a2d4b" filter="url(#shadow)"/>
+  <text x="95" y="1660" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="28">Nästa förändring</text>
+  <text x="95" y="1715" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="36" font-weight="700">Fall börjar om 650 m</text>
+  <text x="95" y="1755" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="22">Diskret stöd för framförhållning och energibesparing</text>
+
+</svg>

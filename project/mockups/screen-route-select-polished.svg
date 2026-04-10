@@ -1,0 +1,48 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#08111d"/>
+      <stop offset="100%" stop-color="#0e1726"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101b2d"/>
+      <stop offset="100%" stop-color="#14233a"/>
+    </linearGradient>
+    <linearGradient id="ctaGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4da3ff"/>
+      <stop offset="100%" stop-color="#79b8ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+  <rect x="30" y="30" width="1020" height="1860" rx="55" fill="url(#bgGrad)" stroke="#31435f" stroke-width="5"/>
+  <rect x="430" y="55" width="220" height="25" rx="12" fill="#20314a"/>
+  <text x="70" y="155" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="52" font-weight="700">Välj rutt</text>
+  <text x="70" y="200" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="24">Förberedd körning på fastställd sträcka</text>
+
+  <rect x="70" y="245" width="940" height="92" rx="24" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <circle cx="115" cy="291" r="14" fill="#4da3ff"/>
+  <text x="145" y="300" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="28">Sök rutt eller välj senaste körning</text>
+
+  <rect x="70" y="390" width="940" height="220" rx="30" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <text x="105" y="455" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="36" font-weight="700">Hallsberg → Mjölby</text>
+  <text x="105" y="505" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="26">Via Degerön</text>
+  <rect x="105" y="535" width="110" height="42" rx="14" fill="#1d3150"/><text x="128" y="563" fill="#79b8ff" font-family="DejaVu Sans, Arial" font-size="22">83 km</text>
+  <rect x="230" y="535" width="150" height="42" rx="14" fill="#1d3150"/><text x="257" y="563" fill="#79b8ff" font-family="DejaVu Sans, Arial" font-size="22">Ruttprofil</text>
+  <path d="M105 590 C 180 565, 260 620, 340 590 S 500 540, 610 570 S 760 640, 900 520" stroke="#38d39f" stroke-width="7" fill="none"/>
+  <rect x="780" y="445" width="145" height="56" rx="18" fill="url(#ctaGrad)"/>
+  <text x="815" y="481" fill="white" font-family="DejaVu Sans, Arial" font-size="24" font-weight="700">Välj</text>
+
+  <rect x="70" y="650" width="940" height="220" rx="30" fill="url(#panelGrad)" filter="url(#shadow)"/>
+  <text x="105" y="715" fill="#eef4ff" font-family="DejaVu Sans, Arial" font-size="36" font-weight="700">Mjölby → Nässjö</text>
+  <text x="105" y="765" fill="#a9bddc" font-family="DejaVu Sans, Arial" font-size="26">Via Tranås</text>
+  <rect x="105" y="795" width="110" height="42" rx="14" fill="#1d3150"/><text x="128" y="823" fill="#79b8ff" font-family="DejaVu Sans, Arial" font-size="22">96 km</text>
+  <rect x="230" y="795" width="170" height="42" rx="14" fill="#1d3150"/><text x="252" y="823" fill="#79b8ff" font-family="DejaVu Sans, Arial" font-size="22">Långprofil</text>
+  <path d="M105 850 C 190 790, 300 810, 380 760 S 520 720, 650 790 S 800 860, 915 790" stroke="#ffd166" stroke-width="7" fill="none"/>
+  <rect x="780" y="705" width="145" height="56" rx="18" fill="url(#ctaGrad)"/>
+  <text x="815" y="741" fill="white" font-family="DejaVu Sans, Arial" font-size="24" font-weight="700">Välj</text>
+
+</svg>
