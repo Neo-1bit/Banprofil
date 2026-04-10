@@ -1,0 +1,6 @@
+<resources>
+    <color name="bp_background">#08111D</color>
+    <color name="bp_panel">#101B2D</color>
+    <color name="bp_accent">#4DA3FF</color>
+    <color name="bp_text">#EEF4FF</color>
+</resources>
